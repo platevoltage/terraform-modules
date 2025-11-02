@@ -1,7 +1,6 @@
 ###############################################################################
 # Server access logging for the ALB logs bucket
 ###############################################################################
-
 locals {
   logs_access_bucket_effective = (
     var.alb_config.logs_access_bucket != null
@@ -71,7 +70,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs_access" {
     abort_incomplete_multipart_upload {
       days_after_initiation = 7
     }
-    
+
     expiration {
       days = var.alb_config.logs_access_expiration
     }
@@ -123,5 +122,3 @@ resource "aws_s3_bucket_public_access_block" "logs_access" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
-
-
