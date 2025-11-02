@@ -7,6 +7,15 @@ resource "aws_s3_bucket" "logs" {
   tags          = var.alb_config.common_tags
 }
 
+# Enable server access logging on the logs bucket to the access bucket
+resource "aws_s3_bucket_logging" "logs" {
+  for_each      = aws_s3_bucket.logs
+  bucket        = each.value.id
+  target_bucket = local.logs_access_bucket_effective
+  target_prefix = var.alb_config.logs_access_prefix
+}
+
+
 resource "aws_s3_bucket_ownership_controls" "logs" {
   for_each = aws_s3_bucket.logs
   bucket   = each.value.id
