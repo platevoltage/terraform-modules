@@ -31,6 +31,7 @@ resource "aws_s3_bucket_versioning" "logs_access" {
 # Create the target bucket (for access logs) if not provided
 resource "aws_s3_bucket" "logs_access" {
   count  = var.alb_config.logs_access_enabled && var.alb_config.logs_access_bucket == null ? 1 : 0
+  #checkov:skip=CKV_AWS_144:Access-logs target bucket; replication not required
   bucket = local.logs_access_bucket_effective
   force_destroy = var.alb_config.logs_access_bucket_force_destroy
   tags         = var.alb_config.common_tags

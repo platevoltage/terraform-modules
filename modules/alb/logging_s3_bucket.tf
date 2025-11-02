@@ -1,7 +1,7 @@
 # Create the logs bucket only when a name is provided
 resource "aws_s3_bucket" "logs" {
   for_each = var.alb_config.logs_bucket != null ? { this = var.alb_config.logs_bucket } : {}
-
+  #checkov:skip=CKV_AWS_144:logs target bucket; replication not required
   bucket        = each.value
   force_destroy = var.alb_config.logs_bucket_force_destroy
   tags          = var.alb_config.common_tags
