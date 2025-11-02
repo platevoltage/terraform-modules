@@ -109,3 +109,17 @@ resource "aws_s3_bucket_logging" "logs_access" {
   target_prefix = var.alb_config.logs_access_prefix
 }
 
+# Public access block for the access-logs bucket (created or external)
+resource "aws_s3_bucket_public_access_block" "logs_access" {
+  count = var.alb_config.logs_access_enabled ? 1 : 0
+
+  bucket = var.alb_config.logs_access_bucket != null
+    ? local.logs_access_bucket_effective
+    : aws_s3_bucket.logs_access[0].id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+

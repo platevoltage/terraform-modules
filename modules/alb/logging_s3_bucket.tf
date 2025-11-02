@@ -107,3 +107,15 @@ resource "aws_s3_bucket_policy" "alb_logs" {
   bucket   = each.value.id
   policy   = data.aws_iam_policy_document.alb_logs_s3[each.key].json
 }
+
+# Public access block for the ALB logs bucket
+resource "aws_s3_bucket_public_access_block" "logs" {
+  for_each = aws_s3_bucket.logs
+  bucket   = each.value.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
