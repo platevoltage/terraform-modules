@@ -122,3 +122,16 @@ resource "aws_s3_bucket_public_access_block" "logs_access" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
+# Event notifications (via EventBridge) for the access-logs bucket
+resource "aws_s3_bucket_notification" "logs_access_eventbridge" {
+  count   = var.alb_config.logs_access_enabled ? 1 : 0
+  bucket  = var.alb_config.logs_access_bucket != null ? local.logs_access_bucket_effective : aws_s3_bucket.logs_access[0].id
+  eventbridge = true
+
+  # Ensure ownership controls and PAB exist first
+  depends_on = [
+    aws_s3_bucket_ownership_controls.logs_access,
+    aws_s3_bucket_public_access_block.logs_access
+  ]
+}

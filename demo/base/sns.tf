@@ -16,6 +16,5 @@ module "sns_dev_alerts" {
         endpoint = var.admin_email
       }
     }
-
   }
 }

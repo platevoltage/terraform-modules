@@ -1,22 +1,3 @@
-# variable "topic_name" {
-#   type = string
-# }
-
-# variable "subscriptions" {
-#   type    = map(map(string))
-#   default = {}
-# }
-
-# variable "name_prefix" {
-#   type        = string
-#   description = "Prefix for naming resources"
-# }
-
-# variable "common_tags" {
-#   type        = map(string)
-#   description = "Common tags to apply to resources"
-#   default     = {}
-# }
 variable "sns_config" {
   type = object({
     account_id = string
