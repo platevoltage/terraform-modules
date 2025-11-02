@@ -59,7 +59,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
   rule {
     id     = "delete"
     status = "Enabled"
-
+    
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+    
     expiration {
       days = var.alb_config.logs_expiration
     }

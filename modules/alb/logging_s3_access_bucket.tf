@@ -68,6 +68,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs_access" {
     id     = "expire-access-logs"
     status = "Enabled"
 
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+    
     expiration {
       days = var.alb_config.logs_access_expiration
     }
@@ -111,15 +115,13 @@ resource "aws_s3_bucket_logging" "logs_access" {
 
 # Public access block for the access-logs bucket (created or external)
 resource "aws_s3_bucket_public_access_block" "logs_access" {
-  count = var.alb_config.logs_access_enabled ? 1 : 0
-
-  bucket = var.alb_config.logs_access_bucket != null
-    ? local.logs_access_bucket_effective
-    : aws_s3_bucket.logs_access[0].id
+  count  = var.alb_config.logs_access_enabled ? 1 : 0
+  bucket = var.alb_config.logs_access_bucket != null ? local.logs_access_bucket_effective : aws_s3_bucket.logs_access[0].id
 
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
 
