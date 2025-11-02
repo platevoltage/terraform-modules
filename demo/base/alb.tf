@@ -10,7 +10,7 @@ module "alb" {
     vpc                       = module.network.vpc
     lb_subnets                = module.network.subnets_public
     lb_sg                     = "deprecating"
-    lb_ssl_policy             = "ELBSecurityPolicy-2016-08"
+    lb_ssl_policy             = "ELBSecurityPolicy-TLS13-1-3-FIPS-2023-04"
     main_domain               = var.base_domain
     additional_domains        = values(local.fqdn_map)
     logs_enabled              = true

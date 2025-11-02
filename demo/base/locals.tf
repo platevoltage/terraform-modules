@@ -16,7 +16,7 @@ locals {
     name_prefix               = local.name_prefix
     env                       = var.env
     aws_region                = var.aws_region
-    lb_ssl_policy             = "ELBSecurityPolicy-2016-08"
+    lb_ssl_policy             = "ELBSecurityPolicy-TLS13-1-3-FIPS-2023-04"
     main_domain               = var.base_domain
     additional_domains        = values(local.fqdn_map)
     fqdn_map                  = local.fqdn_map

@@ -46,7 +46,7 @@ variable "alb_config" {
     lb_subnets = []
     lb_sg      = null
 
-    lb_ssl_policy             = "ELBSecurityPolicy-2016-08"
+    lb_ssl_policy             = "ELBSecurityPolicy-TLS13-1-3-FIPS-2023-04"
     main_domain               = "example.com"
     additional_domains        = []
     logs_enabled              = true
