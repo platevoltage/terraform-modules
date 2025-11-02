@@ -7,6 +7,8 @@ resource "aws_lb" "this" {
   enable_http2       = true
   ip_address_type    = "dualstack"
 
+  enable_deletion_protection = var.alb_config.enable_deletion_protection
+
   drop_invalid_header_fields = true
 
   access_logs {

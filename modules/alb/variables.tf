@@ -33,6 +33,7 @@ variable "alb_config" {
     logs_access_expiration         = optional(number, 365)
     nat_gateway_eips               = optional(list(string), []) 
     logs_kms_key_arn               = optional(string, null)
+    enable_deletion_protection     = optional(bool, true)
   })
 
   default = {
@@ -69,6 +70,7 @@ variable "alb_config" {
     logs_access_expiration           = 365
     nat_gateway_eips                 = []
     logs_kms_key_arn                 = null
+    enable_deletion_protection       = true
   }
 }
 variable "network_config" {
