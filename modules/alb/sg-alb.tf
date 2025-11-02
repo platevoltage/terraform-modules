@@ -1,4 +1,3 @@
-# checkov:skip=CKV2_AWS_5: Attached by aws_lb in this module's LB resource
 resource "aws_security_group" "alb" {
   description = "Alb ${upper(var.network_config.env)}"
   name        = "${local.name_prefix}-alb"
@@ -114,26 +113,27 @@ resource "aws_security_group_rule" "alb_443_v6" {
   security_group_id = aws_security_group.alb.id
 }
 
+# Move these to the ecs-service
 # Allow scrapes from ECS tasks (Prometheus) directly by SG
-resource "aws_security_group_rule" "alb_443_from_tasks" {
-  description              = "Allow HTTPS from ECS tasks"
-  type                     = "ingress"
-  from_port                = 443
-  to_port                  = 443
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.alb.id
-  source_security_group_id = aws_security_group.ecs_fargate_task.id
-}
+# resource "aws_security_group_rule" "alb_443_from_tasks" {
+#   description              = "Allow HTTPS from ECS tasks"
+#   type                     = "ingress"
+#   from_port                = 443
+#   to_port                  = 443
+#   protocol                 = "tcp"
+#   security_group_id        = aws_security_group.alb.id
+#   source_security_group_id = aws_security_group.ecs_fargate_task.id
+# }
 
-resource "aws_security_group_rule" "alb_80_from_tasks" {
-  description              = "Allow HTTP from ECS tasks"
-  type                     = "ingress"
-  from_port                = 80
-  to_port                  = 80
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.alb.id
-  source_security_group_id = aws_security_group.ecs_fargate_task.id
-}
+# resource "aws_security_group_rule" "alb_80_from_tasks" {
+#   description              = "Allow HTTP from ECS tasks"
+#   type                     = "ingress"
+#   from_port                = 80
+#   to_port                  = 80
+#   protocol                 = "tcp"
+#   security_group_id        = aws_security_group.alb.id
+#   source_security_group_id = aws_security_group.ecs_fargate_task.id
+# }
 
 # Extra allow rules for NATGW EIPs
 resource "aws_security_group_rule" "alb_80_nat_eips" {

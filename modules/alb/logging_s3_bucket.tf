@@ -123,15 +123,17 @@ resource "aws_s3_bucket_public_access_block" "logs" {
   restrict_public_buckets = true
 }
 
-# Event notifications (via EventBridge) for the ALB logs bucket
+# Event notifications via EventBridge for the ALB logs bucket
 resource "aws_s3_bucket_notification" "logs_eventbridge" {
   for_each    = aws_s3_bucket.logs
   bucket      = each.value.id
   eventbridge = true
 
+  # Important: depends_on must use static resource references
   depends_on = [
-    aws_s3_bucket_ownership_controls.logs[each.key],
-    aws_s3_bucket_public_access_block.logs[each.key]
+    aws_s3_bucket_ownership_controls.logs,
+    aws_s3_bucket_public_access_block.logs
   ]
 }
+
 
