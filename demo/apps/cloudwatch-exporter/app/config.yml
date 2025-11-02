@@ -1,0 +1,49 @@
+# cloudwatch_exporter.yml
+region: us-east-2
+use_get_metric_data: true
+period_seconds: 300
+range_seconds: 3600
+delay_seconds: 120
+set_timestamp: true
+metrics_per_query: 500
+port: 9106
+
+metrics:
+  # Activity
+  - aws_namespace: AWS/Lambda
+    aws_metric_name: Invocations
+    aws_dimensions: [FunctionName]
+    aws_statistics: [Sum]
+    aws_dimension_select_regex:
+      FunctionName: [".*"]
+
+  - aws_namespace: AWS/Lambda
+    aws_metric_name: Errors
+    aws_dimensions: [FunctionName]
+    aws_statistics: [Sum]
+    aws_dimension_select_regex:
+      FunctionName: [".*"]
+
+  - aws_namespace: AWS/Lambda
+    aws_metric_name: Throttles
+    aws_dimensions: [FunctionName]
+    aws_statistics: [Sum]
+    aws_dimension_select_regex:
+      FunctionName: [".*"]
+
+  # Concurrency
+  - aws_namespace: AWS/Lambda
+    aws_metric_name: ConcurrentExecutions
+    aws_dimensions: [FunctionName]
+    aws_statistics: [Maximum]
+    aws_dimension_select_regex:
+      FunctionName: [".*"]
+
+  # Latency
+  - aws_namespace: AWS/Lambda
+    aws_metric_name: Duration
+    aws_dimensions: [FunctionName]
+    aws_statistics: [Average, Maximum]
+    aws_extended_statistics: ["p95.00"]
+    aws_dimension_select_regex:
+      FunctionName: [".*"]
