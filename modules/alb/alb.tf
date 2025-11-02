@@ -12,7 +12,8 @@ resource "aws_lb" "this" {
   drop_invalid_header_fields = true
 
   access_logs {
-    enabled = var.alb_config.logs_enabled
+    # enabled = var.alb_config.logs_enabled
+    enabled = true
     bucket  = aws_s3_bucket.logs["this"].id
     prefix  = var.alb_config.logs_prefix
   }

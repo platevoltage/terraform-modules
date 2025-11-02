@@ -10,6 +10,7 @@ variable "sns_config" {
       protocol = string
       endpoint = string
     }))
+    kms_key_arn  = optional(string, null)
     common_tags         = map(string)
   })
 
@@ -27,6 +28,7 @@ variable "sns_config" {
         endpoint = "admin@example.com"
       }
     }
+    kms_key_arn  = "alias/aws/sns"
     common_tags         = { Env = "dev", ManagedBy = "terraform", Project = "default" }
   }
 }
