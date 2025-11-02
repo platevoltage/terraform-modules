@@ -51,8 +51,10 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logs_access" {
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm = "aws:kms"
+      # kms_master_key_id = "aws/s3"  # optional
     }
+    bucket_key_enabled = true
   }
 }
 
@@ -95,10 +97,13 @@ resource "aws_s3_bucket_policy" "logs_access" {
   policy = data.aws_iam_policy_document.logs_access_policy[0].json
 }
 
+
 resource "aws_s3_bucket_logging" "logs_access" {
   count  = var.alb_config.logs_access_enabled ? 1 : 0
-  bucket = aws_s3_bucket.logs[0].id
+  # OLD: bucket = aws_s3_bucket.logs[0].id
+  bucket = aws_s3_bucket.logs["this"].id
 
   target_bucket = local.logs_access_bucket_effective
   target_prefix = var.alb_config.logs_access_prefix
 }
+

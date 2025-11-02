@@ -11,7 +11,7 @@ resource "aws_lb" "this" {
 
   access_logs {
     enabled = var.alb_config.logs_enabled
-    bucket  = aws_s3_bucket.logs[0].id
+    bucket  = aws_s3_bucket.logs["this"].id
     prefix  = var.alb_config.logs_prefix
   }
 

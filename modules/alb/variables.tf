@@ -32,6 +32,7 @@ variable "alb_config" {
     logs_access_bucket_force_destroy = optional(bool, false)
     logs_access_expiration         = optional(number, 365)
     nat_gateway_eips               = optional(list(string), []) 
+    logs_kms_key_arn               = optional(string, null)
   })
 
   default = {
@@ -67,6 +68,7 @@ variable "alb_config" {
     logs_access_bucket_force_destroy = false
     logs_access_expiration           = 365
     nat_gateway_eips                 = []
+    logs_kms_key_arn                 = null
   }
 }
 variable "network_config" {
