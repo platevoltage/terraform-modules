@@ -1,3 +1,11 @@
+locals {
+  path_prefix = lookup(
+    local.base_outputs.path_prefix_map,
+    var.app_name,
+    null
+  )
+}
+
 data "aws_ssm_parameters_by_path" "all_app_secrets" {
   path            = local.path_prefix
   recursive       = true
@@ -34,11 +42,6 @@ locals {
   listener_443_arn           = local.base_outputs.alb_listener_443_arn
   log_group_name             = "${local.path_prefix}/ecs-service"
   names                      = data.aws_ssm_parameters_by_path.all_app_secrets.names
-  path_prefix = lookup(
-    local.base_outputs.path_prefix_map,
-    var.app_name,
-    null
-  )
   port          = var.port
   region        = local.base_config.aws_region
   root_domain   = lookup(local.base_config.fqdn_map, "root", null)

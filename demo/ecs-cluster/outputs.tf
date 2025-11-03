@@ -1,19 +1,3 @@
-# === ECS Cluster Outputs ===
-# output "ecs_cluster_id" {
-#   value       = module.ecs_cluster.ecs_cluster_id
-#   description = "ECS Cluster ID"
-# }
-
-# output "ecs_cluster_name" {
-#   value       = module.ecs_cluster.ecs_cluster_name
-#   description = "ECS Cluster name"
-# }
-
-# output "ecs_execution_role_arn" {
-#   value       = module.ecs_cluster.ecs_execution_role_arn
-#   description = "ECS Execution Role ARN"
-# }
-
 output "ecs_cluster_outputs" {
   description = "All ecs_cluster primitives as a single object"
   value = {
