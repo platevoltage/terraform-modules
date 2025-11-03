@@ -1,6 +1,6 @@
 locals {
   name_prefix = "${var.org}-${var.project}-${var.env}"
-  logs_bucket = "${local.name_prefix}-alb-logs-404008372783"
+  logs_bucket = "${local.name_prefix}-alb-logs"
   app_path    = "${var.org}/${var.project}/${var.env}"
 
   fqdn_map = {

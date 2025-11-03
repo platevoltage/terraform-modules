@@ -12,16 +12,17 @@ resource "aws_lb" "this" {
   drop_invalid_header_fields = true
 
   access_logs {
-    # enabled = var.alb_config.logs_enabled
     enabled = true
     bucket  = aws_s3_bucket.logs["this"].id
     prefix  = var.alb_config.logs_prefix
   }
 
   depends_on = [
-    aws_s3_bucket_policy.alb_logs["this"],
+    aws_kms_key.alb_logs,
+    aws_s3_bucket_policy.alb_logs,
     aws_s3_bucket_ownership_controls.logs,
-    aws_s3_bucket_public_access_block.logs
+    aws_s3_bucket_public_access_block.logs,
+    aws_s3_bucket_server_side_encryption_configuration.logs
   ]
   
   tags = var.alb_config.common_tags

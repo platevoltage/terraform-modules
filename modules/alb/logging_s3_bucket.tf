@@ -1,5 +1,6 @@
 # Create the logs bucket only when a name is provided
 resource "aws_s3_bucket" "logs" {
+  #checkov:skip=CKV_AWS_145:ALB access logs require SSE-S3 (AES256). This bucket is the direct ALB destination; KMS is not supported by ALB. Replication to a KMS-encrypted bucket is configured for long-term retention.
   for_each = var.alb_config.logs_bucket != null ? { this = var.alb_config.logs_bucket } : {}
   #checkov:skip=CKV_AWS_144:logs target bucket; replication not required
   bucket        = each.value
@@ -13,6 +14,13 @@ resource "aws_s3_bucket_logging" "logs" {
   bucket        = each.value.id
   target_bucket = local.logs_access_bucket_effective
   target_prefix = var.alb_config.logs_access_prefix
+
+  depends_on = [
+    aws_s3_bucket.logs_access,                         # created when logs_access_bucket == null
+    aws_s3_bucket_ownership_controls.logs_access,
+    aws_s3_bucket_public_access_block.logs_access,
+    aws_s3_bucket_policy.logs_access
+  ]
 }
 
 
@@ -31,8 +39,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm     = "aws:kms"
-      kms_master_key_id = coalesce(var.alb_config.logs_kms_key_arn, "aws/s3")
+      sse_algorithm     = "AES256"
     }
     bucket_key_enabled = true
   }
@@ -73,68 +80,40 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
 data "aws_iam_policy_document" "alb_logs_s3" {
   for_each = aws_s3_bucket.logs
 
-  # Statement 1: Allow ELB service to put objects
   statement {
-    sid    = "AllowELBLogDeliveryPut"
+    sid    = "AWSLogDeliveryWrite"
     effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["logdelivery.elasticloadbalancing.amazonaws.com"]
+    }
+    actions   = ["s3:PutObject"]
+    resources = ["${each.value.arn}/${var.alb_config.logs_prefix}/AWSLogs/${var.alb_config.account_id}/*"]
+  }
 
+  statement {
+    sid    = "AWSLogDeliveryAclCheck"
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["logdelivery.elasticloadbalancing.amazonaws.com"]
+    }
+    actions   = ["s3:GetBucketAcl"]
+    resources = [each.value.arn]
+  }
+
+  statement {
+    sid    = "AllowELBRootAccountPut"
+    effect = "Allow"
     principals {
       type        = "AWS"
       identifiers = ["arn:aws:iam::${local.lb_account_id}:root"]
     }
-
     actions   = ["s3:PutObject"]
     resources = ["${each.value.arn}/${var.alb_config.logs_prefix}/AWSLogs/${var.alb_config.account_id}/*"]
-  }
-
-  # Statement 2: Allow ELB service to get bucket ACL
-  statement {
-    sid    = "AllowELBLogDeliveryGetAcl"
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["logdelivery.elasticloadbalancing.amazonaws.com"]
-    }
-
-    actions   = ["s3:GetBucketAcl"]
-    resources = [each.value.arn]
-  }
-
-  # Statement 3: Allow ELB account to check bucket location (required)
-  statement {
-    sid    = "AWSLogDeliveryWrite"
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["logdelivery.elasticloadbalancing.amazonaws.com"]
-    }
-
-    actions   = ["s3:PutObject"]
-    resources = ["${each.value.arn}/${var.alb_config.logs_prefix}/AWSLogs/${var.alb_config.account_id}/*"]
-
-    condition {
-      test     = "StringEquals"
-      variable = "s3:x-amz-acl"
-      values   = ["bucket-owner-full-control"]
-    }
-  }
-
-  # Statement 4: Allow ELB service to check the bucket
-  statement {
-    sid    = "AWSLogDeliveryAclCheck"
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["logdelivery.elasticloadbalancing.amazonaws.com"]
-    }
-
-    actions   = ["s3:GetBucketAcl"]
-    resources = [each.value.arn]
   }
 }
+
 resource "aws_s3_bucket_policy" "alb_logs" {
   for_each = aws_s3_bucket.logs
   bucket   = each.value.id

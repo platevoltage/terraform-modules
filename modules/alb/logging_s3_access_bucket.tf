@@ -102,16 +102,6 @@ resource "aws_s3_bucket_policy" "logs_access" {
   policy = data.aws_iam_policy_document.logs_access_policy[0].json
 }
 
-
-resource "aws_s3_bucket_logging" "logs_access" {
-  count  = var.alb_config.logs_access_enabled ? 1 : 0
-  # OLD: bucket = aws_s3_bucket.logs[0].id
-  bucket = aws_s3_bucket.logs["this"].id
-
-  target_bucket = local.logs_access_bucket_effective
-  target_prefix = var.alb_config.logs_access_prefix
-}
-
 # Public access block for the access-logs bucket (created or external)
 resource "aws_s3_bucket_public_access_block" "logs_access" {
   count  = var.alb_config.logs_access_enabled ? 1 : 0
