@@ -8,7 +8,7 @@ cd app
 docker build -t my-cw-exporter .
 docker build -t my-cw-exporter .         
 docker run --rm -p 9106:9106 \
-  -e AWS_REGION=us-east-2 \
+  -e AWS_REGION=us-east-1 \
   -e AWS_ACCESS_KEY_ID="xxxx" \
   -e AWS_SECRET_ACCESS_KEY="xxxx" \
   --name cw-exporter my-cw-exporter
@@ -18,7 +18,7 @@ curl http://localhost:9106/metrics
 ```
 
 ```bash
-export AWS_REGION=us-east-2
+export AWS_REGION=us-east-1
 export AWS_ACCOUNT_ID=xxxxxxxx
 export ECR_REPO=builtecho/prod/cloudwatch-exporter
 export IMAGE_TAG=latest

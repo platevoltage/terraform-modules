@@ -4,7 +4,7 @@ set -euo pipefail
 # upload-env-to-ssm.sh
 # Upload each key/value in .env to SSM Parameter Store under /hla/obs/prod/graf/ as SecureString
 
-REGION="${AWS_REGION:-us-east-2}"
+REGION="${AWS_REGION:-us-east-1}"
 PROFILE_ARG="${AWS_PROFILE:+--profile $AWS_PROFILE}"
 
 if [ ! -f .env ]; then

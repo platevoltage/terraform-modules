@@ -16,7 +16,7 @@ docker run --rm -p 3000:3000 \
 
 Push latest from Mac Silicon to ECS AMD Fargate
 ```bash
-export AWS_REGION=us-east-2
+export AWS_REGION=us-east-1
 export AWS_ACCOUNT_ID=xxxxxxx
 export ECR_REPO=builtecho/prod/grafana
 export IMAGE_TAG=latest

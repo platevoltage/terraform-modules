@@ -23,7 +23,7 @@ variable "network_config" {
     account_id          = ""
     env                 = "dev"
     project             = "default"
-    aws_region          = "us-east-2"
+    aws_region          = "us-east-1"
     az_num              = 3
     vpc_ip_block        = "172.27.72.0/22"
     subnet_cidr_private = "172.27.72.0/24"

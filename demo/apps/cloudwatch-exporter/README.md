@@ -7,7 +7,7 @@ Exports CloudWatch metrics to Prometheus format.
 cd app
 docker build -t my-cw-exporter .
 docker run --rm -p 9106:9106 \
-  -e AWS_REGION=us-east-2 \
+  -e AWS_REGION=us-east-1 \
   -e AWS_ACCESS_KEY_ID=your_key \
   -e AWS_SECRET_ACCESS_KEY=your_secret \
   --name cw-exporter my-cw-exporter

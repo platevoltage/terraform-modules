@@ -1,3 +1,3 @@
-export REGION="us-east-2"
+export REGION="us-east-1"
 export CLUSTER_NAME="hla-obs-prod-ecs-cluster"
 export CONTAINER_NAME="hla-obs-prod-cw-exporter"

@@ -1,5 +1,5 @@
 # cloudwatch_exporter.yml
-region: us-east-2
+region: us-east-1
 use_get_metric_data: true
 period_seconds: 300
 range_seconds: 3600

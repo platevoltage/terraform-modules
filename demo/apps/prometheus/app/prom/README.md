@@ -14,7 +14,7 @@ docker run --rm -p 9090:9090 \
 
 Push latest from Mac Silicon to ECS AMD Fargate
 ```bash
-export AWS_REGION=us-east-2
+export AWS_REGION=us-east-1
 export AWS_ACCOUNT_ID=xxxx
 export ECR_REPO=builtecho/prod/prometheus
 export IMAGE_TAG=latest-13

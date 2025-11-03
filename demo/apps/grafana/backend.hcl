@@ -1,4 +1,4 @@
 bucket         = "terraform-demo-state-dce2cf761e97"
 key            = "terraform/state/grafana.tfstate"
-region         = "us-east-2"
+region         = "us-east-1"
 dynamodb_table = "terraform-state-locks"
