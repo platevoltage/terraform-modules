@@ -3,6 +3,7 @@ locals {
   kms_account = var.network_config.account_id != "" ? var.network_config.account_id : data.aws_caller_identity.current.account_id
 }
 
+# modules/network/kms-cloudwatch-logs.tf
 resource "aws_kms_key" "cloudwatch_logs" {
   description         = "KMS CMK for CloudWatch Logs encryption"
   enable_key_rotation = true
@@ -11,37 +12,39 @@ resource "aws_kms_key" "cloudwatch_logs" {
     Version = "2012-10-17",
     Statement = [
       {
-        Sid: "EnableRootPermissions",
-        Effect: "Allow",
-        Principal: { AWS: "arn:aws:iam::${local.kms_account}:root" },
-        Action: "kms:*",
-        Resource: "*"
+        Sid    = "EnableRootPermissions",
+        Effect = "Allow",
+        Principal = { 
+          AWS = "arn:aws:iam::${local.kms_account}:root" 
+        },
+        Action   = "kms:*",
+        Resource = "*"
       },
       {
-        Sid: "AllowCloudWatchLogsUse",
-        Effect: "Allow",
-        Principal: { Service: "logs.${local.kms_region}.amazonaws.com" },
-        Action: [
+        Sid    = "AllowCloudWatchLogsUse",
+        Effect = "Allow",
+        Principal = { 
+          Service = "logs.${local.kms_region}.amazonaws.com" 
+        },
+        Action = [
           "kms:Encrypt",
           "kms:Decrypt",
           "kms:ReEncrypt*",
           "kms:GenerateDataKey*",
+          "kms:CreateGrant",
           "kms:DescribeKey"
         ],
-        Resource: "*",
-        Condition: {
-          StringEquals: {
-            "kms:CallerAccount": "${local.kms_account}",
-            "kms:ViaService": "logs.${local.kms_region}.amazonaws.com"
+        Resource = "*",
+        Condition = {
+          ArnLike = {
+            "kms:EncryptionContext:aws:logs:arn" = "arn:aws:logs:${local.kms_region}:${local.kms_account}:log-group:/aws/vpc/flow-logs/${var.network_config.name_prefix}"
           }
         }
       }
     ]
   })
 
-  tags = merge(local.common_tags, {
-    Name = "${local.name_prefix}-cloudwatch-logs-kms"
-  })
+  tags = merge(local.common_tags, { Name = "${local.name_prefix}-cloudwatch-logs-kms" })
 }
 
 resource "aws_kms_alias" "cloudwatch_logs" {

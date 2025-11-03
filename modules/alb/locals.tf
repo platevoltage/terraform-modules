@@ -8,7 +8,6 @@ locals {
   # https://docs.aws.amazon.com/elasticloadbalancing/latest/application/enable-access-logging.html#attach-bucket-policy
   lb_account_id = lookup({
     "us-east-1"    = "127311923021"
-    "us-east-1"    = "033677994240"
     "us-west-1"    = "027434742980"
     "us-west-2"    = "797873946194"
     },

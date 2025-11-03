@@ -1,4 +1,4 @@
-resource "aws_security_group" "ssm-vpc" {
+resource "aws_security_group" "ssm_vpc" {
   vpc_id      = aws_vpc.main.id
   name        = "${local.name_prefix}-ssm-vpc"
   description = "Allows HTTPS access to SSM endpoint in VPC"
@@ -12,7 +12,7 @@ resource "aws_security_group" "ssm-vpc" {
 ### EGRESS
 resource "aws_security_group_rule" "ssm_egress" {
   description       = "Allow all egress from SSM endpoint SG"
-  security_group_id = aws_security_group.ssm-vpc.id
+  security_group_id = aws_security_group.ssm_vpc.id
   type        = "egress"
   from_port   = 0
   to_port     = 65535
@@ -22,7 +22,7 @@ resource "aws_security_group_rule" "ssm_egress" {
 ### INGRESS
 # resource "aws_security_group_rule" "ssm_ingress" {
 #   description              = "Allow HTTPS to SSM endpoint from ECS tasks"
-#   security_group_id = aws_security_group.ssm-vpc.id
+#   security_group_id = aws_security_group.ssm_vpc.id
 #   type        = "ingress"
 #   from_port   = 443
 #   to_port     = 443

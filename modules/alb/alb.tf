@@ -19,7 +19,9 @@ resource "aws_lb" "this" {
   }
 
   depends_on = [
-    aws_s3_bucket_policy.alb_logs
+    aws_s3_bucket_policy.alb_logs["this"],
+    aws_s3_bucket_ownership_controls.logs,
+    aws_s3_bucket_public_access_block.logs
   ]
   
   tags = var.alb_config.common_tags

@@ -73,8 +73,37 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
 data "aws_iam_policy_document" "alb_logs_s3" {
   for_each = aws_s3_bucket.logs
 
+  # Statement 1: Allow ELB service to put objects
   statement {
-    sid    = "AllowALBLogDeliveryPut"
+    sid    = "AllowELBLogDeliveryPut"
+    effect = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${local.lb_account_id}:root"]
+    }
+
+    actions   = ["s3:PutObject"]
+    resources = ["${each.value.arn}/${var.alb_config.logs_prefix}/AWSLogs/${var.alb_config.account_id}/*"]
+  }
+
+  # Statement 2: Allow ELB service to get bucket ACL
+  statement {
+    sid    = "AllowELBLogDeliveryGetAcl"
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["logdelivery.elasticloadbalancing.amazonaws.com"]
+    }
+
+    actions   = ["s3:GetBucketAcl"]
+    resources = [each.value.arn]
+  }
+
+  # Statement 3: Allow ELB account to check bucket location (required)
+  statement {
+    sid    = "AWSLogDeliveryWrite"
     effect = "Allow"
 
     principals {
@@ -92,8 +121,9 @@ data "aws_iam_policy_document" "alb_logs_s3" {
     }
   }
 
+  # Statement 4: Allow ELB service to check the bucket
   statement {
-    sid    = "AllowALBLogDeliveryGetAcl"
+    sid    = "AWSLogDeliveryAclCheck"
     effect = "Allow"
 
     principals {
@@ -105,7 +135,6 @@ data "aws_iam_policy_document" "alb_logs_s3" {
     resources = [each.value.arn]
   }
 }
-
 resource "aws_s3_bucket_policy" "alb_logs" {
   for_each = aws_s3_bucket.logs
   bucket   = each.value.id
