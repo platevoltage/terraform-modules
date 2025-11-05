@@ -27,6 +27,8 @@ output "base_outputs" {
     alb_listener_443_arn = module.alb.listener_443_arn
     alb_arn_suffix       = module.alb.arn_suffix
     alb_dns_name         = module.alb.alb_dns_name
+    alb_arn              = module.alb.alb_arn
+    alb_sg_id            = module.alb.alb_sg_id
     # sg_ecs_fargate_task  = module.alb.sg_ecs_fargate_task
 
     # === SNS Outputs ===
@@ -46,5 +48,7 @@ output "base_outputs" {
       for idx, app in var.app_names :
       app => trimsuffix(local.base_config.path_prefixes[idx], "/")
     }
+
+
   }
 }

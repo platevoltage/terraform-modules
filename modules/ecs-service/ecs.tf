@@ -58,7 +58,40 @@ resource "aws_ecs_task_definition" "app" {
 ########################
 # ECS Service
 ########################
-resource "aws_ecs_service" "ecs_app_service" {
+# resource "aws_ecs_service" "ecs_app_service" {
+#   name                   = "${var.ecs_service_config.task_name}-fargate-service"
+#   cluster                = var.ecs_service_config.ecs_cluster_id
+#   task_definition        = aws_ecs_task_definition.app.arn
+#   desired_count          = var.ecs_service_config.app_count
+#   enable_execute_command = true
+
+#   capacity_provider_strategy {
+#     capacity_provider = "FARGATE_SPOT"
+#     weight            = 2
+#   }
+
+#   capacity_provider_strategy {
+#     capacity_provider = "FARGATE"
+#     weight            = 1
+#     base              = 1
+#   }
+
+#   network_configuration {
+#     security_groups = [aws_security_group.ecs_fargate_task.id]
+#     subnets          = var.ecs_service_config.fargate_subnets[*].id
+#     assign_public_ip = var.ecs_service_config.assign_public_ip
+#   }
+
+#   load_balancer {
+#     target_group_arn = var.ecs_service_config.tg_arn
+#     container_name   = var.ecs_service_config.task_name
+#     container_port   = var.ecs_service_config.app_port
+#   }
+
+# }
+# ROLLING service
+resource "aws_ecs_service" "ecs_app_service_rolling" {
+  for_each               = var.ecs_service_config.deployment_strategy == "rolling" ? { this = 1 } : {}
   name                   = "${var.ecs_service_config.task_name}-fargate-service"
   cluster                = var.ecs_service_config.ecs_cluster_id
   task_definition        = aws_ecs_task_definition.app.arn
@@ -69,7 +102,6 @@ resource "aws_ecs_service" "ecs_app_service" {
     capacity_provider = "FARGATE_SPOT"
     weight            = 2
   }
-
   capacity_provider_strategy {
     capacity_provider = "FARGATE"
     weight            = 1
@@ -77,7 +109,7 @@ resource "aws_ecs_service" "ecs_app_service" {
   }
 
   network_configuration {
-    security_groups = [aws_security_group.ecs_fargate_task.id]
+    security_groups  = [aws_security_group.ecs_fargate_task.id]
     subnets          = var.ecs_service_config.fargate_subnets[*].id
     assign_public_ip = var.ecs_service_config.assign_public_ip
   }
@@ -87,5 +119,39 @@ resource "aws_ecs_service" "ecs_app_service" {
     container_name   = var.ecs_service_config.task_name
     container_port   = var.ecs_service_config.app_port
   }
-
 }
+
+# CODE_DEPLOY controlled service for blue/green
+resource "aws_ecs_service" "ecs_app_service_codedeploy" {
+  for_each               = var.ecs_service_config.deployment_strategy == "blue_green" ? { this = 1 } : {}
+  name                   = "${var.ecs_service_config.task_name}-fargate-service"
+  cluster                = var.ecs_service_config.ecs_cluster_id
+  task_definition        = aws_ecs_task_definition.app.arn
+  desired_count          = var.ecs_service_config.app_count
+  enable_execute_command = true
+
+  deployment_controller { type = "CODE_DEPLOY" }
+
+  capacity_provider_strategy {
+    capacity_provider = "FARGATE"
+    weight            = 1
+    base              = 1
+  }
+  capacity_provider_strategy {
+    capacity_provider = "FARGATE_SPOT"
+    weight            = 2
+  }
+
+  network_configuration {
+    security_groups  = [aws_security_group.ecs_fargate_task.id]
+    subnets          = var.ecs_service_config.fargate_subnets[*].id
+    assign_public_ip = var.ecs_service_config.assign_public_ip
+  }
+
+  load_balancer {
+    target_group_arn = var.ecs_service_config.blue_tg_arn
+    container_name   = var.ecs_service_config.task_name
+    container_port   = var.ecs_service_config.app_port
+  }
+}
+

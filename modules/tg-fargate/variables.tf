@@ -52,3 +52,8 @@ variable "target_group_config" {
     alarm_sns_topic_arn     = ""
   }
 }
+
+variable "create_listener_rule" {
+  type    = bool
+  default = true
+}

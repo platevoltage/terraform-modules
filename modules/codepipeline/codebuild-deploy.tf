@@ -115,11 +115,60 @@ resource "aws_codebuild_project" "deploy" {
           commands:
             - echo "🚀 Starting build phase..."
             - |
-              aws ecs update-service \
-                --cluster ${local.ecs_cluster_name} \
-                --service ${local.ecs_service_name} \
-                --force-new-deployment \
-                --task-definition ${local.task_name}:$REVISION_NUMBER > ecs-service-update.json
+              if [ "${local.deploy_provider}" = "CodeDeployToECS" ]; then
+                echo "Using CodeDeploy to perform blue/green..."
+
+                # Read ARNs from registration output
+                TASK_DEF_ARN=$(jq -r '.taskDefinition.taskDefinitionArn' ecs-task-definition.json)
+
+                # appspec.json (no heredoc, pure jq)
+                jq -n \
+                  --arg t "$TASK_DEF_ARN" \
+                  --arg n "${local.task_name}" \
+                  --argjson p ${local.port} \
+                  '{version:0.0,
+                    Resources:[
+                      {TargetService:{
+                        Type:"AWS::ECS::Service",
+                        Properties:{
+                          TaskDefinition:$t,
+                          LoadBalancerInfo:{ContainerName:$n, ContainerPort:$p}
+                        }
+                      }}
+                    ]}' > appspec.json
+
+                # create-deployment.final.json using AppSpecContent
+                jq -n \
+                  --arg app "${local.codedeploy_app}" \
+                  --arg dg  "${local.codedeploy_dg}" \
+                  --slurpfile spec appspec.json \
+                  '{applicationName:$app,
+                    deploymentGroupName:$dg,
+                    revision:{
+                      revisionType:"AppSpecContent",
+                      appSpecContent:{content:( $spec[0] | tojson )}
+                    }}' > create-deployment.final.json
+
+                echo "--- appspec.json ---"
+                cat appspec.json
+                echo "--- create-deployment.final.json ---"
+                jq . create-deployment.final.json
+
+                aws deploy create-deployment \
+                  --cli-input-json file://create-deployment.final.json \
+                  > codedeploy-deployment.json
+
+                jq -r '.deploymentId' codedeploy-deployment.json > deployment_id.txt
+                echo "Deployment started: $(cat deployment_id.txt)"
+
+              else
+                echo "Using rolling deploy via ECS UpdateService..."
+                aws ecs update-service \
+                  --cluster ${local.ecs_cluster_name} \
+                  --service ${local.ecs_service_name} \
+                  --force-new-deployment \
+                  --task-definition ${local.task_name}:$REVISION_NUMBER > ecs-service-update.json
+              fi
         post_build:
           commands:
             - echo "🏁 Post-build phase complete! All artifacts are ready and verified."

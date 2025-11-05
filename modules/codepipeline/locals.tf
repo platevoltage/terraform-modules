@@ -26,7 +26,17 @@ locals {
     project     = local.project
     environment = local.environment
   }
-  codebuild_compute_type    = var.codepipeline_config.codebuild_compute_type
-  codebuild_image           = var.codepipeline_config.codebuild_image
-  codebuild_type = can(regex("aarch64", var.codepipeline_config.codebuild_image)) ? "ARM_CONTAINER" : "LINUX_CONTAINER"
+  codebuild_compute_type = var.codepipeline_config.codebuild_compute_type
+  codebuild_image        = var.codepipeline_config.codebuild_image
+  codebuild_type         = can(regex("aarch64", var.codepipeline_config.codebuild_image)) ? "ARM_CONTAINER" : "LINUX_CONTAINER"
+
+  # new
+  deploy_provider = var.codepipeline_config.deploy_provider
+  codedeploy_app  = try(var.codepipeline_config.codedeploy_app, null)
+  codedeploy_dg   = try(var.codepipeline_config.codedeploy_dg, null)
+}
+
+# If a template exists, render it and use it. Otherwise fall back to the inline default.
+locals {
+  buildspec_build = try(file("${path.module}/templates/buildspec-build.yml.tp"), null)
 }

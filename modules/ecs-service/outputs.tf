@@ -1,5 +1,8 @@
 output "ecs_service_name" {
-  value = aws_ecs_service.ecs_app_service.name
+  value = coalesce(
+    try(aws_ecs_service.ecs_app_service_rolling["this"].name, null),
+    try(aws_ecs_service.ecs_app_service_codedeploy["this"].name, null)
+  )
 }
 
 output "ecs_task_role_name" {

@@ -6,7 +6,7 @@ locals {
       priority = var.priority
       vpc_id   = local.vpc_id
 
-      tg_name     = "${var.app_name}-tg"
+      tg_name     = "${var.app_name}-blue"
       tg_port     = var.port
       tg_protocol = "HTTP"
 
@@ -26,6 +26,13 @@ locals {
       alb_arn_suffix      = local.alb_arn_suffix
       host_headers        = ["${var.app_name}.${local.root_domain}"]
       alarm_sns_topic_arn = local.sns_topic_arn
+    }
+  )
+  green_target_group_config = merge(
+    local.target_group_config,
+    { 
+      tg_name = "${var.app_name}-green"
+      priority = var.priority + 1
     }
   )
 }

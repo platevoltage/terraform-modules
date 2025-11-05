@@ -31,6 +31,17 @@ variable "ecs_service_config" {
     name_prefix                = string
     common_tags                = map(string)
     vpc_id                     = string
+
+    ecs_cluster_name           = string
+    deployment_strategy        = optional(string, "rolling") # "rolling" or "blue_green"
+    # for blue_green
+    blue_tg_arn                = optional(string, "")
+    blue_tg_name               = optional(string, "")
+    green_tg_arn               = optional(string, "")
+    green_tg_name              = optional(string, "")
+    prod_listener_arn          = optional(string, "")
+    test_listener_arn          = optional(string, "") # can be same as prod if you don’t split
+    alb_sg_id                  = optional(string, "")
   })
 
   default = {
@@ -64,5 +75,14 @@ variable "ecs_service_config" {
     name_prefix                = ""
     common_tags                = {}
     vpc_id                     = ""
+    ecs_cluster_name           = ""
+    deployment_strategy        = "rolling"
+    blue_tg_arn                = ""
+    blue_tg_name               = ""
+    green_tg_arn               = ""
+    green_tg_name              = ""
+    prod_listener_arn          = ""
+    test_listener_arn          = ""
+    alb_sg_id                  = ""
   }
 }

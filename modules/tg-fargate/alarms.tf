@@ -1,18 +1,16 @@
 resource "aws_cloudwatch_metric_alarm" "unhealthy_instance_count" {
-  alarm_name          = format("%s-%s-%s", var.target_group_config.name_prefix, var.target_group_config.tg_name, "unhealthy-instances")
+  alarm_name          = "${var.target_group_config.tg_name}-unhealthy-hosts"
   comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "2"
+  evaluation_periods  = 1
   metric_name         = "UnHealthyHostCount"
   namespace           = "AWS/ApplicationELB"
-  period              = "120"
+  period              = 60
   statistic           = "Average"
-  threshold           = "1"
-  datapoints_to_alarm = "1"
-
+  threshold           = 1
+  alarm_actions       = [var.target_group_config.alarm_sns_topic_arn]
+  ok_actions          = [var.target_group_config.alarm_sns_topic_arn]
   dimensions = {
     LoadBalancer = var.target_group_config.alb_arn_suffix
-    TargetGroup  = aws_lb_target_group.this.arn_suffix
+    TargetGroup  = aws_lb_target_group.this[0].arn_suffix
   }
-
-  alarm_actions = [var.target_group_config.alarm_sns_topic_arn]
 }

@@ -1,7 +1,6 @@
 data "aws_iam_policy_document" "codebuild_assume_role" {
   statement {
     effect = "Allow"
-
     principals {
       type        = "Service"
       identifiers = ["codebuild.amazonaws.com"]
@@ -18,7 +17,6 @@ resource "aws_iam_role" "code_build_role" {
 data "aws_iam_policy_document" "codebuild_policy_document" {
   statement {
     effect = "Allow"
-
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
@@ -29,11 +27,7 @@ data "aws_iam_policy_document" "codebuild_policy_document" {
 
   statement {
     effect = "Allow"
-
-    actions = [
-      "ec2:DescribeVpcs",
-    ]
-
+    actions = ["ec2:DescribeVpcs"]
     resources = ["*"]
   }
 
@@ -59,12 +53,19 @@ data "aws_iam_policy_document" "codebuild_policy_document" {
       "ecr:UploadLayerPart",
       "ecr:CompleteLayerUpload",
       "ecr:BatchCheckLayerAvailability",
-      "ecr:PutImage"
+      "ecr:PutImage",
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:DescribeImages",
+      "ecr:DescribeRepositories",
+      "ecr:GetRepositoryPolicy",
+      "ecr:ListImages"
     ]
     resources = [
       "arn:aws:ecr:${local.region}:${local.account_id}:repository/${local.image_repo}"
     ]
   }
+
 
   statement {
     effect  = "Allow"
@@ -85,20 +86,17 @@ data "aws_iam_policy_document" "codebuild_policy_document" {
 
   statement {
     effect = "Allow"
-    actions = [
-      "kms:Decrypt"
-    ]
+    actions = ["kms:Decrypt"]
     resources = [data.aws_kms_alias.s3kmskey.target_key_arn]
   }
 
   statement {
     effect  = "Allow"
     actions = ["kms:GenerateDataKey"]
-    resources = [
-      data.aws_kms_alias.s3kmskey.target_key_arn
-    ]
+    resources = [data.aws_kms_alias.s3kmskey.target_key_arn]
   }
 
+  # ECS rolling path
   statement {
     effect = "Allow"
     actions = [
@@ -111,10 +109,18 @@ data "aws_iam_policy_document" "codebuild_policy_document" {
       "ecs:DescribeTasks",
       "iam:PassRole"
     ]
-    # resources = [
-    #   "arn:aws:ecs:${local.region}:${local.account_id}:task-definition/app",
-    #   "arn:aws:ecs:${local.region}:${local.account_id}:service/${local.ecs_cluster_name}/dev-app-fargate-service"
-    # ]
+    resources = ["*"]
+  }
+
+  # CodeDeploy blue green path
+  statement {
+    effect = "Allow"
+    actions = [
+      "codedeploy:CreateDeployment",
+      "codedeploy:GetDeployment",
+      "codedeploy:RegisterApplicationRevision",
+      "codedeploy:GetDeploymentConfig"
+    ]
     resources = ["*"]
   }
 }

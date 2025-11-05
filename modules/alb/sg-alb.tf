@@ -74,6 +74,16 @@ resource "aws_security_group_rule" "alb_80" {
   security_group_id = aws_security_group.alb.id
 }
 
+resource "aws_security_group_rule" "alb_8080" {
+  count = length(var.network_config.public_ips)
+  description = values(var.network_config.public_ips)[count.index]
+  type        = "ingress"
+  from_port   = 8080
+  to_port     = 8080
+  protocol    = "tcp"
+  cidr_blocks = [keys(var.network_config.public_ips)[count.index]]
+  security_group_id = aws_security_group.alb.id
+}
 resource "aws_security_group_rule" "alb_443" {
   count = length(var.network_config.public_ips)
 
@@ -100,6 +110,16 @@ resource "aws_security_group_rule" "alb_80_v6" {
   security_group_id = aws_security_group.alb.id
 }
 
+resource "aws_security_group_rule" "alb_8080_v6" {
+  count = length(var.network_config.public_ips_v6)
+  description      = values(var.network_config.public_ips)[count.index]
+  type             = "ingress"
+  from_port        = 8080
+  to_port          = 8080
+  protocol         = "tcp"
+  ipv6_cidr_blocks = [keys(var.network_config.public_ips_v6)[count.index]]
+  security_group_id = aws_security_group.alb.id
+}
 resource "aws_security_group_rule" "alb_443_v6" {
   count = length(var.network_config.public_ips_v6)
 

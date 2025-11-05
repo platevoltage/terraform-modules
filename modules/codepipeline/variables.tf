@@ -23,6 +23,11 @@ variable "codepipeline_config" {
     region                     = string
     ssm_secret_path_prefix     = string
     task_name                  = string
+
+    # new for conditional deploy
+    deploy_provider            = string              # "ECS" or "CodeDeployToECS"
+    codedeploy_app             = optional(string)
+    codedeploy_dg              = optional(string)
   })
 
   default = {
@@ -49,5 +54,9 @@ variable "codepipeline_config" {
     region                     = "us-east-1"
     ssm_secret_path_prefix     = "/app/dev"
     task_name                  = "app"
+
+    deploy_provider            = "ECS"
+    codedeploy_app             = null
+    codedeploy_dg              = null
   }
 }

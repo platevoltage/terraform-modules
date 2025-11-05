@@ -41,10 +41,10 @@ locals {
   listener_443_arn           = local.base_outputs.alb_listener_443_arn
   log_group_name             = "${local.path_prefix}/ecs-service"
   names                      = data.aws_ssm_parameters_by_path.all_app_secrets.names
-  port          = var.port
-  region        = local.base_config.aws_region
-  root_domain   = lookup(local.base_config.fqdn_map, "root", null)
-  sns_topic_arn = local.base_outputs.sns_topic_arn
+  port                       = var.port
+  region                     = local.base_config.aws_region
+  root_domain                = lookup(local.base_config.fqdn_map, "root", null)
+  sns_topic_arn              = local.base_outputs.sns_topic_arn
   ssm_secret_path_prefix = lookup(
     local.base_outputs.ssm_secret_path_prefix_map,
     var.app_name,
@@ -53,6 +53,3 @@ locals {
   task_name = "${local.base_config.name_prefix}-${local.app_name}"
   vpc_id    = local.base_outputs.vpc_id
 }
-
-
-

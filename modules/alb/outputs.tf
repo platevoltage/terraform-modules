@@ -13,3 +13,12 @@ output "arn_suffix" {
 output "alias_zones_debug" {
   value = local.alias_zones
 }
+
+output "alb_arn" {
+  value = aws_lb.this.arn
+}
+
+output "alb_sg_id" {
+  description = "Security group id of the ALB"
+  value       = aws_security_group.alb.id
+}

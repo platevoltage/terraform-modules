@@ -22,6 +22,10 @@ locals {
       region                     = local.region
       ssm_secret_path_prefix     = local.ssm_secret_path_prefix
       task_name                  = local.task_name
+
+      deploy_provider = var.deployment_strategy == "blue_green" ? "CodeDeployToECS" : "ECS"
+      codedeploy_app  = var.deployment_strategy == "blue_green" ? "${local.task_name}-cd-app" : null
+      codedeploy_dg   = var.deployment_strategy == "blue_green" ? "${local.task_name}-cd-dg"  : null
     }
   )
 }

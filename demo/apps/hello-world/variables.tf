@@ -82,3 +82,10 @@ variable "priority" {
   description = "Should be 100 higher then the previous app deployed"
   type        = number
 }
+
+variable "deployment_strategy" {
+  description = "rolling or blue_green"
+  type        = string
+  default     = "rolling"
+}
+

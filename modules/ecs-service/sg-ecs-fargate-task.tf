@@ -35,15 +35,13 @@ resource "aws_security_group_rule" "ecs_fargate_task_egress_v6" {
   security_group_id = aws_security_group.ecs_fargate_task.id
 }
 
-### INGRESS FROM ALB
-
-# resource "aws_security_group_rule" "ecs_fargate_task_alb_microservices" {
-#   description = "From ALB Microservices"
-#   type        = "ingress"
-#   from_port   = 0
-#   to_port     = 65535
-#   protocol    = "tcp"
-
-#   security_group_id        = aws_security_group.ecs_fargate_task.id
-#   source_security_group_id = aws_security_group.alb.id
-# }
+# INGRESS FROM ALB
+resource "aws_security_group_rule" "from_alb_to_task" {
+  description              = "Allow ALB to reach app port"
+  type                     = "ingress"
+  from_port                = var.ecs_service_config.app_port
+  to_port                  = var.ecs_service_config.app_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.ecs_fargate_task.id
+  source_security_group_id = var.ecs_service_config.alb_sg_id
+}
