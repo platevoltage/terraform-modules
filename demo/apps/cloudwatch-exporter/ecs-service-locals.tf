@@ -16,7 +16,6 @@ locals {
       ecs_cluster_name           = local.ecs_cluster_outputs.ecs_cluster_name
       ecs_execution_role         = local.ecs_cluster_outputs.ecs_execution_role_arn
       fargate_cpu                = var.fargate_cpu
-      fargate_ecs_task_sg        = local.fargate_ecs_task_sg
       fargate_memory             = var.fargate_memory
       fargate_subnets            = local.fargate_subnets
       healthcheck_endpoint       = var.healthcheck_endpoint

@@ -19,7 +19,6 @@ locals {
       ecs_cluster_name           = local.ecs_cluster_outputs.ecs_cluster_name
       ecs_execution_role         = local.ecs_cluster_outputs.ecs_execution_role_arn
       fargate_cpu                = var.fargate_cpu
-      fargate_ecs_task_sg        = local.fargate_ecs_task_sg
       fargate_memory             = var.fargate_memory
       fargate_subnets            = local.fargate_subnets
       healthcheck_endpoint       = var.healthcheck_endpoint
@@ -37,7 +36,9 @@ locals {
       ssm_secret_path_prefix_map = local.base_outputs.ssm_secret_path_prefix_map
       task_name                  = local.task_name
       tg_arn                     = module.target_group.tg_arn
-
+      name_prefix                = local.base_outputs.name_prefix
+      common_tags                = local.base_config.common_tags
+      vpc_id                     = local.base_outputs.vpc_id
     }
 
 

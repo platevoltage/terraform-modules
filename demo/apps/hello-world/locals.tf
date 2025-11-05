@@ -32,7 +32,6 @@ locals {
   fargate_cpu                = var.fargate_cpu
   fargate_ecs_execution_role = local.ecs_cluster_outputs.ecs_execution_role_arn
   fargate_ecs_task_role      = module.ecs_service.ecs_task_role_name
-  fargate_ecs_task_sg        = local.base_outputs.sg_ecs_fargate_task
   fargate_memory             = var.fargate_memory
   fargate_subnets            = local.base_outputs.private_subnet_ids
   git_branch                 = var.git_branch

@@ -69,6 +69,7 @@ resource "aws_ecs_service" "ecs_app_service" {
     capacity_provider = "FARGATE_SPOT"
     weight            = 2
   }
+
   capacity_provider_strategy {
     capacity_provider = "FARGATE"
     weight            = 1
@@ -76,7 +77,7 @@ resource "aws_ecs_service" "ecs_app_service" {
   }
 
   network_configuration {
-    security_groups  = [var.ecs_service_config.fargate_ecs_task_sg.id]
+    security_groups = [aws_security_group.ecs_fargate_task.id]
     subnets          = var.ecs_service_config.fargate_subnets[*].id
     assign_public_ip = var.ecs_service_config.assign_public_ip
   }
