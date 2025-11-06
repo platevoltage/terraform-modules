@@ -1,7 +1,7 @@
 # s3-replication.tf
 
 ############################################
-# Artifact bucket replica (existing logic)
+# Artifact bucket replica
 ############################################
 resource "aws_s3_bucket" "codepipeline_bucket_replica" {
   provider = aws.replica
@@ -16,12 +16,12 @@ resource "aws_s3_bucket_ownership_controls" "codepipeline_bucket_replica" {
 }
 
 resource "aws_s3_bucket_public_access_block" "codepipeline_bucket_replica" {
-  provider                 = aws.replica
-  bucket                   = aws_s3_bucket.codepipeline_bucket_replica.id
-  block_public_acls        = true
-  block_public_policy      = true
-  ignore_public_acls       = true
-  restrict_public_buckets  = true
+  provider                = aws.replica
+  bucket                  = aws_s3_bucket.codepipeline_bucket_replica.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "codepipeline_bucket_replica" {
@@ -47,7 +47,7 @@ resource "aws_s3_bucket_versioning" "codepipeline_bucket_replica" {
 }
 
 ############################################
-# Access-logs bucket replica (new)
+# Access-logs bucket replica
 ############################################
 resource "aws_s3_bucket" "codepipeline_access_logs_replica" {
   provider = aws.replica
@@ -62,12 +62,12 @@ resource "aws_s3_bucket_ownership_controls" "codepipeline_access_logs_replica" {
 }
 
 resource "aws_s3_bucket_public_access_block" "codepipeline_access_logs_replica" {
-  provider                 = aws.replica
-  bucket                   = aws_s3_bucket.codepipeline_access_logs_replica.id
-  block_public_acls        = true
-  block_public_policy      = true
-  ignore_public_acls       = true
-  restrict_public_buckets  = true
+  provider                = aws.replica
+  bucket                  = aws_s3_bucket.codepipeline_access_logs_replica.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "codepipeline_access_logs_replica" {
@@ -92,8 +92,123 @@ resource "aws_s3_bucket_versioning" "codepipeline_access_logs_replica" {
   lifecycle { ignore_changes = [versioning_configuration[0].mfa_delete] }
 }
 
+# Allow S3 server access logs to write into the replica access-logs bucket
+data "aws_iam_policy_document" "codepipeline_access_logs_replica_policy" {
+  statement {
+    sid     = "S3ServerAccessLogsPolicyReplica"
+    effect  = "Allow"
+    actions = ["s3:PutObject"]
+    principals {
+      type        = "Service"
+      identifiers = ["logging.s3.amazonaws.com"]
+    }
+    resources = ["${aws_s3_bucket.codepipeline_access_logs_replica.arn}/s3-access-logs/*"]
+  }
+}
+
+resource "aws_s3_bucket_policy" "codepipeline_access_logs_replica" {
+  provider = aws.replica
+  bucket   = aws_s3_bucket.codepipeline_access_logs_replica.id
+  policy   = data.aws_iam_policy_document.codepipeline_access_logs_replica_policy.json
+}
+
 ############################################
-# Replication role and policy (expanded)
+# Secondary logs bucket in replica region
+# (so the access-logs bucket can have its own logging target)
+############################################
+resource "aws_s3_bucket" "codepipeline_access_logs_replica_dst" {
+  provider = aws.replica
+  bucket   = "${local.task_name}-codepipeline-access-replica-dst"
+  tags     = local.common_tags
+}
+
+resource "aws_s3_bucket_ownership_controls" "codepipeline_access_logs_replica_dst" {
+  provider = aws.replica
+  bucket   = aws_s3_bucket.codepipeline_access_logs_replica_dst.id
+  rule { object_ownership = "BucketOwnerEnforced" }
+}
+
+resource "aws_s3_bucket_public_access_block" "codepipeline_access_logs_replica_dst" {
+  provider                = aws.replica
+  bucket                  = aws_s3_bucket.codepipeline_access_logs_replica_dst.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# Use SSE-S3 here to avoid extra KMS grants for the logging service
+resource "aws_s3_bucket_server_side_encryption_configuration" "codepipeline_access_logs_replica_dst" {
+  provider = aws.replica
+  bucket   = aws_s3_bucket.codepipeline_access_logs_replica_dst.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_versioning" "codepipeline_access_logs_replica_dst" {
+  provider = aws.replica
+  bucket   = aws_s3_bucket.codepipeline_access_logs_replica_dst.id
+  versioning_configuration {
+    status     = "Enabled"
+    mfa_delete = "Disabled"
+  }
+  lifecycle { ignore_changes = [versioning_configuration[0].mfa_delete] }
+}
+
+# Allow S3 to write server access logs into the dst bucket
+data "aws_iam_policy_document" "codepipeline_access_logs_replica_dst_policy" {
+  statement {
+    sid     = "S3ServerAccessLogsPolicyReplicaDst"
+    effect  = "Allow"
+    actions = ["s3:PutObject"]
+    principals {
+      type        = "Service"
+      identifiers = ["logging.s3.amazonaws.com"]
+    }
+    resources = ["${aws_s3_bucket.codepipeline_access_logs_replica_dst.arn}/s3-access-logs-of-logs/*"]
+  }
+}
+
+resource "aws_s3_bucket_policy" "codepipeline_access_logs_replica_dst" {
+  provider = aws.replica
+  bucket   = aws_s3_bucket.codepipeline_access_logs_replica_dst.id
+  policy   = data.aws_iam_policy_document.codepipeline_access_logs_replica_dst_policy.json
+}
+
+############################################
+# Enable server access logging (replica region)
+############################################
+# Artifact replica -> logs replica
+resource "aws_s3_bucket_logging" "codepipeline_bucket_replica" {
+  provider      = aws.replica
+  bucket        = aws_s3_bucket.codepipeline_bucket_replica.id
+  target_bucket = aws_s3_bucket.codepipeline_access_logs_replica.id
+  target_prefix = "s3-access-logs/"
+  depends_on = [
+    aws_s3_bucket_policy.codepipeline_access_logs_replica,
+    aws_s3_bucket_ownership_controls.codepipeline_access_logs_replica,
+    aws_s3_bucket_public_access_block.codepipeline_access_logs_replica
+  ]
+}
+
+# Logs replica -> logs-dst replica
+resource "aws_s3_bucket_logging" "codepipeline_access_logs_replica" {
+  provider      = aws.replica
+  bucket        = aws_s3_bucket.codepipeline_access_logs_replica.id
+  target_bucket = aws_s3_bucket.codepipeline_access_logs_replica_dst.id
+  target_prefix = "s3-access-logs-of-logs/"
+  depends_on = [
+    aws_s3_bucket_policy.codepipeline_access_logs_replica_dst,
+    aws_s3_bucket_ownership_controls.codepipeline_access_logs_replica_dst,
+    aws_s3_bucket_public_access_block.codepipeline_access_logs_replica_dst
+  ]
+}
+
+############################################
+# Replication role and policy
 ############################################
 data "aws_iam_policy_document" "replication_assume" {
   statement {
@@ -131,7 +246,7 @@ data "aws_iam_policy_document" "replication_policy" {
     resources = ["${aws_s3_bucket.codepipeline_bucket.arn}/*"]
   }
 
-  # Read source: access-logs bucket (new)
+  # Read source: access-logs bucket
   statement {
     effect    = "Allow"
     actions   = ["s3:GetReplicationConfiguration", "s3:ListBucket"]
@@ -162,7 +277,7 @@ data "aws_iam_policy_document" "replication_policy" {
     resources = ["${aws_s3_bucket.codepipeline_bucket_replica.arn}/*"]
   }
 
-  # Write destination: access-logs bucket replica (new)
+  # Write destination: access-logs bucket replica
   statement {
     effect = "Allow"
     actions = [
@@ -195,9 +310,8 @@ resource "aws_iam_role_policy" "replication" {
 }
 
 ############################################
-# Replication configurations (artifact + logs)
+# Replication configurations
 ############################################
-# Artifact bucket replication (existing, kept)
 resource "aws_s3_bucket_replication_configuration" "codepipeline_bucket" {
   bucket = aws_s3_bucket.codepipeline_bucket.id
   role   = aws_iam_role.replication.arn
@@ -231,7 +345,6 @@ resource "aws_s3_bucket_replication_configuration" "codepipeline_bucket" {
   ]
 }
 
-# Access-logs bucket replication (new, fixes CKV_AWS_144)
 resource "aws_s3_bucket_replication_configuration" "codepipeline_access_logs" {
   bucket = aws_s3_bucket.codepipeline_access_logs.id
   role   = aws_iam_role.replication.arn
