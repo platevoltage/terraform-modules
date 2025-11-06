@@ -33,7 +33,7 @@ scrape_configs:
     scrape_interval: 5m
     scrape_timeout: 1m
     static_configs:
-      - targets: ["cw-exporter.obs.hardlineapp.com"]
+      - targets: ["cw-exporter.demo.space-rocket.com"]
     tls_config:
       insecure_skip_verify: true
     relabel_configs:
@@ -47,7 +47,7 @@ scrape_configs:
     scrape_interval: 5m
     scrape_timeout: 1m
     static_configs:
-      - targets: ["hello-world.obs.hardlineapp.com", "localhost:9091"]
+      - targets: ["hello.demo.space-rocket.com", "localhost:9091"]
     tls_config:
       insecure_skip_verify: true
     relabel_configs:

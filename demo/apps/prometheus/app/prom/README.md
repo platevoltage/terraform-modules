@@ -15,9 +15,9 @@ docker run --rm -p 9090:9090 \
 Push latest from Mac Silicon to ECS AMD Fargate
 ```bash
 export AWS_REGION=us-east-1
-export AWS_ACCOUNT_ID=xxxx
-export ECR_REPO=builtecho/prod/prometheus
-export IMAGE_TAG=latest-13
+export AWS_ACCOUNT_ID=078618946307
+export ECR_REPO=space-rocket/prod/prometheus
+export IMAGE_TAG=latest
 export ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}"
 
 aws ecr get-login-password --region "$AWS_REGION" \
@@ -32,4 +32,4 @@ topk(10,
   sum by (function_name) (
     sum_over_time(aws_lambda_invocations_sum[24h])
   )
-)```
+)```# prometheus

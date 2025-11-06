@@ -1,6 +1,6 @@
 resource "aws_security_group" "ecs_fargate_task" {
   description = "ECS Fargate task security group"
-  name        = "${var.ecs_service_config.name_prefix}-ecs-fargate-task"
+  name        = "${var.ecs_service_config.name_prefix}-${var.ecs_service_config.app_name}-fargate-task-sg"
   vpc_id      = var.ecs_service_config.vpc_id
 
   lifecycle {
@@ -8,7 +8,7 @@ resource "aws_security_group" "ecs_fargate_task" {
   }
 
   tags = merge(var.ecs_service_config.common_tags, {
-    Name = "${var.ecs_service_config.name_prefix}-ecs-fargate-task"
+    Name = "${var.ecs_service_config.name_prefix}-${var.ecs_service_config.app_name}-fargate-task-sg"
   })
 }
 

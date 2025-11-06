@@ -1,3 +1,11 @@
+locals {
+  path_prefix = lookup(
+    local.base_outputs.path_prefix_map,
+    var.app_name,
+    null
+  )
+}
+
 data "aws_ssm_parameters_by_path" "all_app_secrets" {
   path            = local.path_prefix
   recursive       = true
@@ -15,6 +23,7 @@ locals {
       valueFrom = path_prefix
     }
   ]
+  app_environments           = []
   base_config                = data.terraform_remote_state.base.outputs.base_config
   base_outputs               = data.terraform_remote_state.base.outputs.base_outputs
   codebuild_compute_type     = var.codebuild_compute_type
@@ -23,7 +32,6 @@ locals {
   fargate_cpu                = var.fargate_cpu
   fargate_ecs_execution_role = local.ecs_cluster_outputs.ecs_execution_role_arn
   fargate_ecs_task_role      = module.ecs_service.ecs_task_role_name
-  fargate_ecs_task_sg        = local.base_outputs.sg_ecs_fargate_task
   fargate_memory             = var.fargate_memory
   fargate_subnets            = local.base_outputs.private_subnet_ids
   git_branch                 = var.git_branch
@@ -33,15 +41,10 @@ locals {
   listener_443_arn           = local.base_outputs.alb_listener_443_arn
   log_group_name             = "${local.path_prefix}/ecs-service"
   names                      = data.aws_ssm_parameters_by_path.all_app_secrets.names
-  path_prefix = lookup(
-    local.base_outputs.path_prefix_map,
-    var.app_name,
-    null
-  )
-  port          = var.port
-  region        = local.base_config.aws_region
-  root_domain   = lookup(local.base_config.fqdn_map, "root", null)
-  sns_topic_arn = local.base_outputs.sns_topic_arn
+  port                       = var.port
+  region                     = local.base_config.aws_region
+  root_domain                = lookup(local.base_config.fqdn_map, "root", null)
+  sns_topic_arn              = local.base_outputs.sns_topic_arn
   ssm_secret_path_prefix = lookup(
     local.base_outputs.ssm_secret_path_prefix_map,
     var.app_name,
@@ -50,6 +53,3 @@ locals {
   task_name = "${local.base_config.name_prefix}-${local.app_name}"
   vpc_id    = local.base_outputs.vpc_id
 }
-
-
-
