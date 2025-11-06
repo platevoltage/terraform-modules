@@ -499,3 +499,59 @@ resource "aws_s3_bucket_logging" "codepipeline_access_logs_replica_dst_primary" 
     aws_s3_bucket_public_access_block.codepipeline_access_logs
   ]
 }
+
+# Lifecycle for artifact bucket replica
+resource "aws_s3_bucket_lifecycle_configuration" "codepipeline_bucket_replica" {
+  provider = aws.replica
+  bucket   = aws_s3_bucket.codepipeline_bucket_replica.id
+
+  rule {
+    id     = "expire-artifacts"
+    status = "Enabled"
+
+    abort_incomplete_multipart_upload { days_after_initiation = 7 }
+    expiration { days = 90 }
+  }
+}
+
+# Lifecycle for access-logs bucket replica
+resource "aws_s3_bucket_lifecycle_configuration" "codepipeline_access_logs_replica" {
+  provider = aws.replica
+  bucket   = aws_s3_bucket.codepipeline_access_logs_replica.id
+
+  rule {
+    id     = "expire-access-logs"
+    status = "Enabled"
+
+    abort_incomplete_multipart_upload { days_after_initiation = 7 }
+    expiration { days = 365 }
+  }
+}
+
+# Lifecycle for dst logs bucket in replica region
+resource "aws_s3_bucket_lifecycle_configuration" "codepipeline_access_logs_replica_dst" {
+  provider = aws.replica
+  bucket   = aws_s3_bucket.codepipeline_access_logs_replica_dst.id
+
+  rule {
+    id     = "expire-access-logs-of-logs"
+    status = "Enabled"
+
+    abort_incomplete_multipart_upload { days_after_initiation = 7 }
+    expiration { days = 365 }
+  }
+}
+
+# Lifecycle for primary bucket that receives dst replication
+resource "aws_s3_bucket_lifecycle_configuration" "codepipeline_access_logs_replica_dst_primary" {
+  bucket = aws_s3_bucket.codepipeline_access_logs_replica_dst_primary.id
+
+  rule {
+    id     = "expire-access-logs-pri"
+    status = "Enabled"
+
+    abort_incomplete_multipart_upload { days_after_initiation = 7 }
+    expiration { days = 365 }
+  }
+}
+
