@@ -15,17 +15,21 @@ resource "aws_iam_role" "code_build_role" {
 }
 
 data "aws_iam_policy_document" "codebuild_policy_document" {
+  # CloudWatch Logs for CodeBuild build and deploy projects
   statement {
-    sid     = "LogsWrite"
-    effect  = "Allow"
+    sid    = "LogsWrite"
+    effect = "Allow"
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
-      "logs:PutLogEvents"
+      "logs:PutLogEvents",
+      "logs:DescribeLogStreams"
     ]
     resources = [
-      "arn:aws:logs:${local.region}:${local.account_id}:log-group:${local.log_group_name}",
-      "arn:aws:logs:${local.region}:${local.account_id}:log-group:${local.log_group_name}:*"
+      # log groups used by logs_config.cloudwatch_logs.group_name
+      "arn:aws:logs:${local.region}:${local.account_id}:log-group:${local.log_group_name}/codebuild/*",
+      # required for stream creation and events
+      "arn:aws:logs:${local.region}:${local.account_id}:log-group:${local.log_group_name}/codebuild/*:log-stream:*"
     ]
   }
 

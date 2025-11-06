@@ -22,10 +22,14 @@ resource "aws_s3_bucket_public_access_block" "codepipeline_access_logs" {
   restrict_public_buckets = true
 }
 
+# CKV_AWS_145 fix: use KMS for access logs bucket
 resource "aws_s3_bucket_server_side_encryption_configuration" "codepipeline_access_logs" {
   bucket = aws_s3_bucket.codepipeline_access_logs.id
   rule {
-    apply_server_side_encryption_by_default { sse_algorithm = "AES256" }
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = data.aws_kms_alias.s3kmskey.target_key_arn
+    }
     bucket_key_enabled = true
   }
 }
@@ -46,16 +50,13 @@ data "aws_iam_policy_document" "codepipeline_access_logs_policy" {
     sid     = "S3ServerAccessLogsPolicy"
     effect  = "Allow"
     actions = ["s3:PutObject"]
-
     principals {
       type        = "Service"
       identifiers = ["logging.s3.amazonaws.com"]
     }
-
     resources = ["${aws_s3_bucket.codepipeline_access_logs.arn}/s3-access-logs/*"]
   }
 }
-
 
 resource "aws_s3_bucket_policy" "codepipeline_access_logs" {
   bucket = aws_s3_bucket.codepipeline_access_logs.id
@@ -130,10 +131,3 @@ resource "aws_s3_bucket_notification" "codepipeline_bucket_eventbridge" {
     aws_s3_bucket_public_access_block.codepipeline_bucket
   ]
 }
-
-
-
-# resource "random_integer" "rand" {
-#   min = 1000000
-#   max = 9999999
-# }
