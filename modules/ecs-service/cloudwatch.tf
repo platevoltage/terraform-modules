@@ -49,7 +49,7 @@ resource "aws_kms_alias" "cloudwatch_logs" {
 # Encrypted log group
 resource "aws_cloudwatch_log_group" "fargate_task_log_group" {
   name              = var.ecs_service_config.log_group_name
-  retention_in_days = 30
+  retention_in_days = 365
   kms_key_id        = aws_kms_key.cloudwatch_logs.arn
 
   tags = try(var.ecs_service_config.common_tags, null)
