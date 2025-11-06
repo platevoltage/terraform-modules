@@ -131,3 +131,15 @@ resource "aws_s3_bucket_notification" "codepipeline_bucket_eventbridge" {
     aws_s3_bucket_public_access_block.codepipeline_bucket
   ]
 }
+
+# Versioning for access-logs bucket (CKV_AWS_21)
+resource "aws_s3_bucket_versioning" "codepipeline_access_logs" {
+  bucket = aws_s3_bucket.codepipeline_access_logs.id
+  versioning_configuration {
+    status     = "Enabled"
+    mfa_delete = "Disabled"
+  }
+  # AWS sets MFA Delete by hand only; ignore drift
+  lifecycle { ignore_changes = [versioning_configuration[0].mfa_delete] }
+}
+
