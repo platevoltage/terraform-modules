@@ -18,51 +18,80 @@ resource "aws_iam_role" "codepipeline_role" {
 
 data "aws_iam_policy_document" "codepipeline_policy" {
   statement {
-    effect = "Allow"
-
+    sid     = "S3ReadArtifacts"
+    effect  = "Allow"
     actions = [
       "s3:GetObject",
       "s3:GetObjectVersion",
       "s3:GetBucketVersioning",
-      "s3:PutObjectAcl",
-      "s3:PutObject",
+      "s3:ListBucket"
     ]
-
     resources = [
       aws_s3_bucket.codepipeline_bucket.arn,
       "${aws_s3_bucket.codepipeline_bucket.arn}/*"
     ]
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["true"]
+    }
   }
 
   statement {
-    effect = "Allow"
+    sid     = "S3WriteArtifacts"
+    effect  = "Allow"
+    actions = ["s3:PutObject"]
+    resources = [
+      "${aws_s3_bucket.codepipeline_bucket.arn}/*"
+    ]
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["true"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "s3:x-amz-server-side-encryption"
+      values   = ["aws:kms"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "s3:x-amz-server-side-encryption-aws-kms-key-id"
+      values   = [data.aws_kms_alias.s3kmskey.target_key_arn]
+    }
+  }
+
+  statement {
+    sid     = "CodeStarUse"
+    effect  = "Allow"
     actions = [
       "codestar-connections:UseConnection",
       "codestar-connections:PassConnection",
-      "codestar-connections:GetConnection",
+      "codestar-connections:GetConnection"
     ]
     resources = [aws_codestarconnections_connection.github_connection.arn]
   }
 
   statement {
-    effect = "Allow"
-
+    sid     = "CodeBuildStartAndRead"
+    effect  = "Allow"
     actions = [
-      "codebuild:BatchGetBuilds",
       "codebuild:StartBuild",
+      "codebuild:BatchGetBuilds"
     ]
-
-    resources = ["*"]
+    resources = [
+      aws_codebuild_project.build.arn,
+      aws_codebuild_project.deploy.arn
+    ]
   }
 
   statement {
-    effect = "Allow"
-
+    sid     = "KmsForArtifacts"
+    effect  = "Allow"
     actions = [
       "kms:GenerateDataKey",
       "kms:Decrypt"
     ]
-
     resources = [data.aws_kms_alias.s3kmskey.target_key_arn]
   }
 }

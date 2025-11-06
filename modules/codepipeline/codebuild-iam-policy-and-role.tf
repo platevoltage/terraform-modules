@@ -16,37 +16,74 @@ resource "aws_iam_role" "code_build_role" {
 
 data "aws_iam_policy_document" "codebuild_policy_document" {
   statement {
-    effect = "Allow"
+    sid     = "LogsWrite"
+    effect  = "Allow"
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
-      "logs:PutLogEvents",
+      "logs:PutLogEvents"
     ]
-    resources = ["*"]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = ["ec2:DescribeVpcs"]
-    resources = ["*"]
-  }
-
-  statement {
-    effect  = "Allow"
-    actions = ["s3:GetObject", "s3:ListBucket"]
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.codepipeline_bucket.bucket}",
-      "arn:aws:s3:::${aws_s3_bucket.codepipeline_bucket.bucket}/*"
+      "arn:aws:logs:${local.region}:${local.account_id}:log-group:${local.log_group_name}",
+      "arn:aws:logs:${local.region}:${local.account_id}:log-group:${local.log_group_name}:*"
     ]
   }
 
   statement {
+    sid       = "Describe"
+    effect    = "Allow"
+    actions   = ["ec2:DescribeVpcs"]
+    resources = ["*"]
+  }
+
+  statement {
+    sid     = "S3ReadArtifacts"
+    effect  = "Allow"
+    actions = ["s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket"]
+    resources = [
+      aws_s3_bucket.codepipeline_bucket.arn,
+      "${aws_s3_bucket.codepipeline_bucket.arn}/*"
+    ]
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["true"]
+    }
+  }
+
+  statement {
+    sid     = "S3WriteArtifacts"
+    effect  = "Allow"
+    actions = ["s3:PutObject"]
+    resources = [
+      "${aws_s3_bucket.codepipeline_bucket.arn}/*"
+    ]
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["true"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "s3:x-amz-server-side-encryption"
+      values   = ["aws:kms"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "s3:x-amz-server-side-encryption-aws-kms-key-id"
+      values   = [data.aws_kms_alias.s3kmskey.target_key_arn]
+    }
+  }
+
+  statement {
+    sid       = "EcrAuth"
     effect    = "Allow"
     actions   = ["ecr:GetAuthorizationToken"]
     resources = ["*"]
   }
 
   statement {
+    sid    = "EcrRWSingleRepo"
     effect = "Allow"
     actions = [
       "ecr:InitiateLayerUpload",
@@ -66,55 +103,63 @@ data "aws_iam_policy_document" "codebuild_policy_document" {
     ]
   }
 
-
   statement {
-    effect  = "Allow"
-    actions = ["s3:PutObject"]
-    resources = [
-      "arn:aws:s3:::${aws_s3_bucket.codepipeline_bucket.bucket}/*"
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "codestar-connections:UseConnection",
-      "codestar-connections:PassConnection"
-    ]
+    sid       = "CodeStarUse"
+    effect    = "Allow"
+    actions   = ["codestar-connections:UseConnection", "codestar-connections:PassConnection"]
     resources = [aws_codestarconnections_connection.github_connection.arn]
   }
 
   statement {
-    effect = "Allow"
-    actions = ["kms:Decrypt"]
+    sid       = "KmsForArtifacts"
+    effect    = "Allow"
+    actions   = ["kms:Decrypt", "kms:GenerateDataKey"]
     resources = [data.aws_kms_alias.s3kmskey.target_key_arn]
   }
 
   statement {
+    sid     = "EcsRegisterDescribe"
     effect  = "Allow"
-    actions = ["kms:GenerateDataKey"]
-    resources = [data.aws_kms_alias.s3kmskey.target_key_arn]
-  }
-
-  # ECS rolling path
-  statement {
-    effect = "Allow"
     actions = [
       "ecs:RegisterTaskDefinition",
       "ecs:ListTaskDefinitions",
-      "ecs:DescribeTaskDefinition",
-      "ecs:UpdateService",
-      "ecs:DescribeServices",
-      "ecs:ListTasks",
-      "ecs:DescribeTasks",
-      "iam:PassRole"
+      "ecs:DescribeTaskDefinition"
     ]
     resources = ["*"]
   }
 
-  # CodeDeploy blue green path
   statement {
-    effect = "Allow"
+    sid     = "EcsUpdateSingleService"
+    effect  = "Allow"
+    actions = [
+      "ecs:UpdateService",
+      "ecs:DescribeServices",
+      "ecs:ListTasks",
+      "ecs:DescribeTasks"
+    ]
+    resources = [
+      "arn:aws:ecs:${local.region}:${local.account_id}:service/${local.ecs_cluster_name}/${local.ecs_service_name}"
+    ]
+  }
+
+  statement {
+    sid     = "IamPassSpecificRoles"
+    effect  = "Allow"
+    actions = ["iam:PassRole"]
+    resources = [
+      "arn:aws:iam::${local.account_id}:role/${local.fargate_ecs_task_role}",
+      local.fargate_ecs_execution_role
+    ]
+    condition {
+      test     = "StringEquals"
+      variable = "iam:PassedToService"
+      values   = ["ecs-tasks.amazonaws.com"]
+    }
+  }
+
+  statement {
+    sid     = "CodeDeployEcs"
+    effect  = "Allow"
     actions = [
       "codedeploy:CreateDeployment",
       "codedeploy:GetDeployment",
@@ -122,6 +167,11 @@ data "aws_iam_policy_document" "codebuild_policy_document" {
       "codedeploy:GetDeploymentConfig"
     ]
     resources = ["*"]
+    condition {
+      test     = "StringEqualsIfExists"
+      variable = "codedeploy:ApplicationName"
+      values   = [coalesce(local.codedeploy_app, local.task_name)]
+    }
   }
 }
 
