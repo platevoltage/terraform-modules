@@ -19,7 +19,7 @@ resource "aws_kms_key" "s3kmskey_replica" {
         Resource  = "*"
       },
       {
-        Sid       = "AllowS3UseForReplicaBucket"
+        Sid       = "AllowS3UseForReplicaBuckets"
         Effect    = "Allow"
         Principal = { Service = "s3.amazonaws.com" }
         Action    = ["kms:Encrypt","kms:Decrypt","kms:ReEncrypt*","kms:GenerateDataKey*","kms:CreateGrant","kms:DescribeKey"]
@@ -30,7 +30,10 @@ resource "aws_kms_key" "s3kmskey_replica" {
             "kms:ViaService"    = "s3.${data.aws_region.replica.id}.amazonaws.com"
           },
           ArnLike = {
-            "kms:EncryptionContext:aws:s3:arn" = "arn:aws:s3:::${aws_s3_bucket.codepipeline_bucket_replica.id}/*"
+            "kms:EncryptionContext:aws:s3:arn" = [
+              "arn:aws:s3:::${aws_s3_bucket.codepipeline_bucket_replica.id}/*",
+              "arn:aws:s3:::${aws_s3_bucket.codepipeline_access_logs_replica.id}/*"
+            ]
           }
         }
       },
