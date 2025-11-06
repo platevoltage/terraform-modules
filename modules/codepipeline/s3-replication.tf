@@ -486,3 +486,16 @@ resource "aws_s3_bucket_replication_configuration" "codepipeline_access_logs_rep
     aws_s3_bucket_public_access_block.codepipeline_access_logs_replica_dst_primary
   ]
 }
+
+# Enable server access logging on the primary dst bucket
+resource "aws_s3_bucket_logging" "codepipeline_access_logs_replica_dst_primary" {
+  bucket        = aws_s3_bucket.codepipeline_access_logs_replica_dst_primary.id
+  target_bucket = aws_s3_bucket.codepipeline_access_logs.id
+  target_prefix = "s3-access-logs/"
+
+  depends_on = [
+    aws_s3_bucket_policy.codepipeline_access_logs,
+    aws_s3_bucket_ownership_controls.codepipeline_access_logs,
+    aws_s3_bucket_public_access_block.codepipeline_access_logs
+  ]
+}
