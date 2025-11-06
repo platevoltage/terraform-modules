@@ -1,8 +1,12 @@
-# Lightweight HTTP listener for CodeDeploy test traffic
+# HTTPS test listener for CodeDeploy test traffic
 resource "aws_lb_listener" "test_8080" {
   load_balancer_arn = local.base_outputs.alb_arn
-  port              = 8080
-  protocol          = "HTTP"
+  port              = 8443
+  protocol          = "HTTPS"
+
+  # Use the same TLS policy you set in base_config.alb
+  ssl_policy      = local.base_config.lb_ssl_policy
+  certificate_arn = local.base_outputs.cert_arn
 
   default_action {
     type = "fixed-response"
