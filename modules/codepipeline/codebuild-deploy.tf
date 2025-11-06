@@ -3,7 +3,8 @@ resource "aws_codebuild_project" "deploy" {
   description   = "${local.task_name} Codebuild Deploy Project"
   build_timeout = 5
   service_role  = aws_iam_role.code_build_role.arn
-
+  encryption_key = data.aws_kms_alias.s3kmskey.target_key_arn
+  
   artifacts {
     type = "CODEPIPELINE"
   }
