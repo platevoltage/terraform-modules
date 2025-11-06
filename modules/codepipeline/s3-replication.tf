@@ -92,7 +92,7 @@ resource "aws_s3_bucket_versioning" "codepipeline_access_logs_replica" {
   lifecycle { ignore_changes = [versioning_configuration[0].mfa_delete] }
 }
 
-# Allow S3 server access logs to write into the replica access-logs bucket
+# Allow server access logs writer in replica region
 data "aws_iam_policy_document" "codepipeline_access_logs_replica_policy" {
   statement {
     sid     = "S3ServerAccessLogsPolicyReplica"
@@ -113,8 +113,8 @@ resource "aws_s3_bucket_policy" "codepipeline_access_logs_replica" {
 }
 
 ############################################
-# Secondary logs bucket in replica region
-# (so the access-logs bucket can have its own logging target)
+# Secondary logs bucket in replica region (dst)
+# KMS encrypted and replicated back to primary
 ############################################
 resource "aws_s3_bucket" "codepipeline_access_logs_replica_dst" {
   provider = aws.replica
@@ -137,14 +137,16 @@ resource "aws_s3_bucket_public_access_block" "codepipeline_access_logs_replica_d
   restrict_public_buckets = true
 }
 
-# Use SSE-S3 here to avoid extra KMS grants for the logging service
+# KMS encryption to satisfy CKV_AWS_145
 resource "aws_s3_bucket_server_side_encryption_configuration" "codepipeline_access_logs_replica_dst" {
   provider = aws.replica
   bucket   = aws_s3_bucket.codepipeline_access_logs_replica_dst.id
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = data.aws_kms_alias.s3kmskey_replica.target_key_arn
     }
+    bucket_key_enabled = true
   }
 }
 
@@ -158,7 +160,7 @@ resource "aws_s3_bucket_versioning" "codepipeline_access_logs_replica_dst" {
   lifecycle { ignore_changes = [versioning_configuration[0].mfa_delete] }
 }
 
-# Allow S3 to write server access logs into the dst bucket
+# Allow server access logs to write into the dst bucket
 data "aws_iam_policy_document" "codepipeline_access_logs_replica_dst_policy" {
   statement {
     sid     = "S3ServerAccessLogsPolicyReplicaDst"
@@ -179,7 +181,7 @@ resource "aws_s3_bucket_policy" "codepipeline_access_logs_replica_dst" {
 }
 
 ############################################
-# Enable server access logging (replica region)
+# Enable server access logging in replica
 ############################################
 # Artifact replica -> logs replica
 resource "aws_s3_bucket_logging" "codepipeline_bucket_replica" {
@@ -194,7 +196,7 @@ resource "aws_s3_bucket_logging" "codepipeline_bucket_replica" {
   ]
 }
 
-# Logs replica -> logs-dst replica
+# Logs replica -> dst bucket
 resource "aws_s3_bucket_logging" "codepipeline_access_logs_replica" {
   provider      = aws.replica
   bucket        = aws_s3_bucket.codepipeline_access_logs_replica.id
@@ -205,6 +207,47 @@ resource "aws_s3_bucket_logging" "codepipeline_access_logs_replica" {
     aws_s3_bucket_ownership_controls.codepipeline_access_logs_replica_dst,
     aws_s3_bucket_public_access_block.codepipeline_access_logs_replica_dst
   ]
+}
+
+############################################
+# Primary target for dst replication
+############################################
+resource "aws_s3_bucket" "codepipeline_access_logs_replica_dst_primary" {
+  bucket = "${local.task_name}-codepipeline-access-replica-dst-pri"
+  tags   = local.common_tags
+}
+
+resource "aws_s3_bucket_ownership_controls" "codepipeline_access_logs_replica_dst_primary" {
+  bucket = aws_s3_bucket.codepipeline_access_logs_replica_dst_primary.id
+  rule { object_ownership = "BucketOwnerEnforced" }
+}
+
+resource "aws_s3_bucket_public_access_block" "codepipeline_access_logs_replica_dst_primary" {
+  bucket                  = aws_s3_bucket.codepipeline_access_logs_replica_dst_primary.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "codepipeline_access_logs_replica_dst_primary" {
+  bucket = aws_s3_bucket.codepipeline_access_logs_replica_dst_primary.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = data.aws_kms_alias.s3kmskey.target_key_arn
+    }
+    bucket_key_enabled = true
+  }
+}
+
+resource "aws_s3_bucket_versioning" "codepipeline_access_logs_replica_dst_primary" {
+  bucket = aws_s3_bucket.codepipeline_access_logs_replica_dst_primary.id
+  versioning_configuration {
+    status     = "Enabled"
+    mfa_delete = "Disabled"
+  }
+  lifecycle { ignore_changes = [versioning_configuration[0].mfa_delete] }
 }
 
 ############################################
@@ -265,6 +308,25 @@ data "aws_iam_policy_document" "replication_policy" {
     resources = ["${aws_s3_bucket.codepipeline_access_logs.arn}/*"]
   }
 
+  # Read source: replica dst bucket
+  statement {
+    effect    = "Allow"
+    actions   = ["s3:GetReplicationConfiguration", "s3:ListBucket"]
+    resources = [aws_s3_bucket.codepipeline_access_logs_replica_dst.arn]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:GetObjectVersion",
+      "s3:GetObjectVersionAcl",
+      "s3:GetObjectVersionForReplication",
+      "s3:GetObjectLegalHold",
+      "s3:GetObjectVersionTagging",
+      "s3:ObjectOwnerOverrideToBucketOwner"
+    ]
+    resources = ["${aws_s3_bucket.codepipeline_access_logs_replica_dst.arn}/*"]
+  }
+
   # Write destination: artifact bucket replica
   statement {
     effect = "Allow"
@@ -289,18 +351,30 @@ data "aws_iam_policy_document" "replication_policy" {
     resources = ["${aws_s3_bucket.codepipeline_access_logs_replica.arn}/*"]
   }
 
-  # KMS on source
+  # Write destination: dst primary bucket
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:ReplicateObject",
+      "s3:ReplicateDelete",
+      "s3:ReplicateTags",
+      "s3:ObjectOwnerOverrideToBucketOwner"
+    ]
+    resources = ["${aws_s3_bucket.codepipeline_access_logs_replica_dst_primary.arn}/*"]
+  }
+
+  # KMS on sources
   statement {
     effect    = "Allow"
     actions   = ["kms:Decrypt", "kms:DescribeKey"]
-    resources = [data.aws_kms_alias.s3kmskey.target_key_arn]
+    resources = [data.aws_kms_alias.s3kmskey.target_key_arn, data.aws_kms_alias.s3kmskey_replica.target_key_arn]
   }
 
-  # KMS on destination
+  # KMS on destinations
   statement {
     effect    = "Allow"
     actions   = ["kms:Encrypt", "kms:ReEncrypt*", "kms:DescribeKey", "kms:GenerateDataKey*"]
-    resources = [data.aws_kms_alias.s3kmskey_replica.target_key_arn]
+    resources = [data.aws_kms_alias.s3kmskey.target_key_arn, data.aws_kms_alias.s3kmskey_replica.target_key_arn]
   }
 }
 
@@ -375,5 +449,40 @@ resource "aws_s3_bucket_replication_configuration" "codepipeline_access_logs" {
     aws_s3_bucket_versioning.codepipeline_access_logs_replica,
     aws_s3_bucket_public_access_block.codepipeline_access_logs,
     aws_s3_bucket_public_access_block.codepipeline_access_logs_replica
+  ]
+}
+
+# New: replicate the dst bucket back to primary to satisfy CKV_AWS_144
+resource "aws_s3_bucket_replication_configuration" "codepipeline_access_logs_replica_dst" {
+  provider = aws.replica
+  bucket   = aws_s3_bucket.codepipeline_access_logs_replica_dst.id
+  role     = aws_iam_role.replication.arn
+
+  rule {
+    id     = "replicate-dst-to-primary"
+    status = "Enabled"
+
+    delete_marker_replication { status = "Enabled" }
+    filter { prefix = "" }
+
+    source_selection_criteria {
+      sse_kms_encrypted_objects { status = "Enabled" }
+    }
+
+    destination {
+      bucket        = aws_s3_bucket.codepipeline_access_logs_replica_dst_primary.arn
+      storage_class = "STANDARD"
+
+      encryption_configuration {
+        replica_kms_key_id = data.aws_kms_alias.s3kmskey.target_key_arn
+      }
+    }
+  }
+
+  depends_on = [
+    aws_s3_bucket_versioning.codepipeline_access_logs_replica_dst,
+    aws_s3_bucket_versioning.codepipeline_access_logs_replica_dst_primary,
+    aws_s3_bucket_public_access_block.codepipeline_access_logs_replica_dst,
+    aws_s3_bucket_public_access_block.codepipeline_access_logs_replica_dst_primary
   ]
 }

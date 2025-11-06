@@ -32,7 +32,8 @@ resource "aws_kms_key" "s3kmskey_replica" {
           ArnLike = {
             "kms:EncryptionContext:aws:s3:arn" = [
               "arn:aws:s3:::${aws_s3_bucket.codepipeline_bucket_replica.id}/*",
-              "arn:aws:s3:::${aws_s3_bucket.codepipeline_access_logs_replica.id}/*"
+              "arn:aws:s3:::${aws_s3_bucket.codepipeline_access_logs_replica.id}/*",
+              "arn:aws:s3:::${aws_s3_bucket.codepipeline_access_logs_replica_dst.id}/*"
             ]
           }
         }
