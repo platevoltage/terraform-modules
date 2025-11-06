@@ -555,3 +555,46 @@ resource "aws_s3_bucket_lifecycle_configuration" "codepipeline_access_logs_repli
   }
 }
 
+# Event notifications for the artifact replica bucket
+resource "aws_s3_bucket_notification" "codepipeline_bucket_replica_eventbridge" {
+  provider    = aws.replica
+  bucket      = aws_s3_bucket.codepipeline_bucket_replica.id
+  eventbridge = true
+  depends_on = [
+    aws_s3_bucket_ownership_controls.codepipeline_bucket_replica,
+    aws_s3_bucket_public_access_block.codepipeline_bucket_replica
+  ]
+}
+
+# Event notifications for the access-logs replica bucket
+resource "aws_s3_bucket_notification" "codepipeline_access_logs_replica_eventbridge" {
+  provider    = aws.replica
+  bucket      = aws_s3_bucket.codepipeline_access_logs_replica.id
+  eventbridge = true
+  depends_on = [
+    aws_s3_bucket_ownership_controls.codepipeline_access_logs_replica,
+    aws_s3_bucket_public_access_block.codepipeline_access_logs_replica
+  ]
+}
+
+# Event notifications for the dst logs bucket in replica region
+resource "aws_s3_bucket_notification" "codepipeline_access_logs_replica_dst_eventbridge" {
+  provider    = aws.replica
+  bucket      = aws_s3_bucket.codepipeline_access_logs_replica_dst.id
+  eventbridge = true
+  depends_on = [
+    aws_s3_bucket_ownership_controls.codepipeline_access_logs_replica_dst,
+    aws_s3_bucket_public_access_block.codepipeline_access_logs_replica_dst
+  ]
+}
+
+# Event notifications for the primary bucket that receives dst replication
+resource "aws_s3_bucket_notification" "codepipeline_access_logs_replica_dst_primary_eventbridge" {
+  bucket      = aws_s3_bucket.codepipeline_access_logs_replica_dst_primary.id
+  eventbridge = true
+  depends_on = [
+    aws_s3_bucket_ownership_controls.codepipeline_access_logs_replica_dst_primary,
+    aws_s3_bucket_public_access_block.codepipeline_access_logs_replica_dst_primary
+  ]
+}
+

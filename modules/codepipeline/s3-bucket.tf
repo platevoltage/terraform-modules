@@ -143,3 +143,13 @@ resource "aws_s3_bucket_versioning" "codepipeline_access_logs" {
   lifecycle { ignore_changes = [versioning_configuration[0].mfa_delete] }
 }
 
+# Event notifications via EventBridge for the access-logs bucket
+resource "aws_s3_bucket_notification" "codepipeline_access_logs_eventbridge" {
+  bucket      = aws_s3_bucket.codepipeline_access_logs.id
+  eventbridge = true
+  depends_on = [
+    aws_s3_bucket_ownership_controls.codepipeline_access_logs,
+    aws_s3_bucket_public_access_block.codepipeline_access_logs
+  ]
+}
+
