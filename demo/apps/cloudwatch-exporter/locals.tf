@@ -10,7 +10,6 @@ locals {
   ecs_cluster_outputs     = data.terraform_remote_state.ecs_cluster.outputs.ecs_cluster_outputs
   fargate_cpu             = var.fargate_cpu
   fargate_ecs_execution_role = local.ecs_cluster_outputs.ecs_execution_role_arn
-  fargate_ecs_task_sg     = local.base_outputs.sg_ecs_fargate_task
   fargate_memory          = var.fargate_memory
   fargate_subnets         = local.base_outputs.private_subnet_ids
   git_branch              = var.git_branch
@@ -22,8 +21,7 @@ locals {
   # Define path_prefix BEFORE using it
   path_prefix = lookup(
     local.base_outputs.path_prefix_map,
-    var.app_name,
-    "/hla/obs/prod/cloudwatch-exporter"  # Default fallback
+    var.app_name
   )
   
   log_group_name          = "${local.path_prefix}/ecs-service"

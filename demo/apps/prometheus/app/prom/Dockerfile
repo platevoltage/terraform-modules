@@ -1,7 +1,6 @@
 # syntax=docker/dockerfile:1
-
 ARG PROMETHEUS_VERSION=v2.54.1
-FROM prom/prometheus:${PROMETHEUS_VERSION}
+FROM 078618946307.dkr.ecr.us-east-1.amazonaws.com/prometheus:${PROMETHEUS_VERSION}
 
 USER root
 RUN mkdir -p /etc/prometheus /etc/prometheus/rules /prometheus \

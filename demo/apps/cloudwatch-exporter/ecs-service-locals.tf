@@ -1,4 +1,8 @@
 locals {
+  deployment_strategy = var.deployment_strategy
+}
+
+locals {
   ecs_service_config = merge(
     local.base_config,
     {
@@ -33,6 +37,30 @@ locals {
       ssm_secret_path_prefix_map = local.base_outputs.ssm_secret_path_prefix_map
       task_name                  = local.task_name
       tg_arn                     = module.target_group.tg_arn
+      vpc_id                     = local.base_outputs.vpc_id
+
+      # rolling input
+      tg_arn = module.target_group.tg_arn
+
+      # strategy inputs
+      deployment_strategy = local.deployment_strategy
+
+      # blue green extras
+      blue_tg_arn       = try(module.target_group.tg_arn, "")
+      green_tg_arn      = try(module.target_group_green[0].tg_arn, "")
+
+      # add names so CodeDeploy can rely on them even if an ARN is empty
+      blue_tg_name      = try(module.target_group.tg_name, "")
+      green_tg_name     = try(module.target_group_green[0].tg_name, "")
+
+      prod_listener_arn = local.listener_443_arn
+      # Use a distinct listener for test traffic when blue_green
+      test_listener_arn = var.deployment_strategy == "blue_green" ? aws_lb_listener.test_8080.arn : null
+
+      deploy_provider            = local.deployment_strategy == "blue_green" ? "CodeDeployToECS" : "ECS"
+      codedeploy_app             = local.deployment_strategy == "blue_green" ? "${local.task_name}-cd-app" : null
+      codedeploy_dg              = local.deployment_strategy == "blue_green" ? "${local.task_name}-cd-dg"  : null
+      alb_sg_id                  = local.base_outputs.alb_sg_id
     }
   )
 }

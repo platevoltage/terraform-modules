@@ -19,8 +19,8 @@ curl http://localhost:9106/metrics
 
 ```bash
 export AWS_REGION=us-east-1
-export AWS_ACCOUNT_ID=xxxxxxxx
-export ECR_REPO=builtecho/prod/cloudwatch-exporter
+export AWS_ACCOUNT_ID=078618946307
+export ECR_REPO=space-rocket/prod/cloudwatch-exporter
 export IMAGE_TAG=latest
 export ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}"
 
@@ -49,16 +49,16 @@ terraform apply
 ```
 
 ## Verify
-Access metrics: `https://cloudwatch-exporter.obs.hardlineapp.com/metrics`
-```
+Access metrics: `https://cloudwatch-exporter.demo.space-rocket.com/metrics`
 
+```
 ---
 
 ## Where to Create These Files
 
 Create this directory structure:
 ```
-observability/prod/apps/cloudwatch-exporter/
+demo/apps/cloudwatch-exporter/
 └── app/
     ├── Dockerfile      ← Copy from artifact
     ├── config.yml      ← Copy from artifact
@@ -76,4 +76,4 @@ topk(10,
 
 ```bash
 topk(10, sum by (function_name) (sum_over_time(aws_lambda_invocations_sum[24h])))
-```
+```# cloudwatch-exporter

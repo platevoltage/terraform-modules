@@ -44,4 +44,10 @@ resource "aws_security_group_rule" "from_alb_to_task" {
   protocol                 = "tcp"
   security_group_id        = aws_security_group.ecs_fargate_task.id
   source_security_group_id = var.ecs_service_config.alb_sg_id
+
+  depends_on = [aws_security_group.ecs_fargate_task]
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }

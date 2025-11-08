@@ -28,4 +28,11 @@ locals {
       alarm_sns_topic_arn = local.sns_topic_arn
     }
   )
+  green_target_group_config = merge(
+    local.target_group_config,
+    { 
+      tg_name = "${var.app_name}-green"
+      priority = var.priority + 1
+    }
+  )
 }
