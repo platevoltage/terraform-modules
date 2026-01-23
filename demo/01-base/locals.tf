@@ -9,13 +9,14 @@ locals {
   }
 
   base_config = {
-    account_id                = var.account_id
+    account_id                = local.account_id
     base_domain               = var.base_domain
     project                   = var.project
     project_name              = "${var.project}-${var.env}"
     name_prefix               = local.name_prefix
     env                       = var.env
     aws_region                = var.aws_region
+    # TODO: Make var:
     lb_ssl_policy             = "ELBSecurityPolicy-TLS13-1-3-FIPS-2023-04"
     main_domain               = var.base_domain
     additional_domains        = values(local.fqdn_map)
@@ -33,7 +34,7 @@ locals {
 
     ssm_secret_path_prefixes = [
       for app in var.app_names :
-      "arn:aws:ssm:${var.aws_region}:${var.account_id}:parameter/${local.app_path}/${app}"
+      "arn:aws:ssm:${var.aws_region}:${local.account_id}:parameter/${local.app_path}/${app}"
     ]
 
     # just a list of prefixes
