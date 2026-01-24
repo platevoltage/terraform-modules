@@ -59,6 +59,44 @@
 | data.terraform_remote_state.base | data source | Consumes outputs from the Base Module Group |
 | data.terraform_remote_state.ecs_cluster | data source | Consumes outputs from the ECS Cluster Module |
 
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| app_name | Logical application name used for naming and resource scoping. |
+| app_port | Container port exposed by the application. |
+| deployment_strategy | Deployment strategy for the ECS service (rolling or blue_green). |
+| healthcheck_endpoint | HTTP healthcheck endpoint used by ALB and ECS health checks. |
+| app_url | Primary HTTPS URL for the app when root domain is configured in base remote state. |
+| app_host_header | Host header used by the ALB listener rule for routing. |
+| log_group_name | CloudWatch Logs group name used for ECS task and pipeline logs. |
+| path_prefix | Base path prefix resolved from base_outputs.path_prefix_map for this app. |
+| ssm_secret_path_prefix | SSM Parameter Store secret path prefix resolved from base outputs. |
+| sns_topic_arn | SNS topic ARN for CodePipeline and deployment notifications. |
+| sns_kms_key_arn | KMS key ARN used to encrypt the SNS topic. |
+| sns_kms_alias | KMS alias name used for the SNS topic key. |
+| ecs_cluster_id | ECS cluster id from remote state. |
+| ecs_cluster_name | ECS cluster name from remote state. |
+| ecs_service_name | ECS service name created for this app (rolling or blue_green). |
+| ecs_task_definition_arn | ECS task definition ARN for the app. |
+| ecs_task_role_name | IAM role name assumed by the ECS task. |
+| ecs_task_definition_family | ECS task definition family for the app. |
+| ecs_task_definition_revision | ECS task definition revision number for the app. |
+| task_name | Task or service name prefix used across resources. |
+| app_image | Full ECR image reference used by the ECS task definition. |
+| target_group_blue_arn | Target group ARN used for production traffic (blue). |
+| target_group_blue_name | Target group name used for production traffic (blue). |
+| target_group_green_arn | Target group ARN used for green traffic when deployment_strategy is blue_green. |
+| target_group_green_name | Target group name used for green traffic when deployment_strategy is blue_green. |
+| prod_listener_arn | ALB HTTPS listener ARN used for production traffic routing. |
+| test_listener_arn | ALB HTTPS test listener ARN used by CodeDeploy for blue_green test traffic. |
+| codedeploy_app_name | CodeDeploy application name when deployment_strategy is blue_green. |
+| codedeploy_deployment_group_name | CodeDeploy deployment group name when deployment_strategy is blue_green. |
+| git_repo | GitHub repository used by the pipeline source action. |
+| git_branch | Git branch used by the pipeline source action. |
+| image_repo | ECR repository name used by the build (repo path only, no registry). |
+| image_tag | Image tag input used by the service config. |
+
 ## Related Projects
 
 - [01-base](../01-base)  

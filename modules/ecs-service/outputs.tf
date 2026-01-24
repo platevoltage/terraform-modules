@@ -15,4 +15,18 @@ output "task_name" {
   description = "The name of the app that this service deploys."
 }
 
+output "ecs_task_definition_arn" {
+  description = "ARN of the ECS task definition created for this service."
+  value       = aws_ecs_task_definition.app.arn
+}
+
+output "ecs_task_definition_family" {
+  description = "Task definition family name."
+  value       = aws_ecs_task_definition.app.family
+}
+
+output "ecs_task_definition_revision" {
+  description = "Task definition revision number."
+  value       = aws_ecs_task_definition.app.revision
+}
 

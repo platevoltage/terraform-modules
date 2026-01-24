@@ -131,10 +131,10 @@ This module primarily consumes configuration from the Base Module Group via remo
 
 ## Related Projects
 
-- [01-base](demo/01-base) - 
+- [01-base](demo/01-base) -
   Provisions the production ready AWS networking, ingress, DNS, and alerting foundation consumed by this module.
 
-- [03-apps](demo/03-apps) -  
+- [03-apps](demo/03-apps) -
   Provisions and deploys ECS applications on top of the shared base network and ECS cluster, including ALB routing, CI CD, secrets injection, and observability.
 
 > [!TIP]
