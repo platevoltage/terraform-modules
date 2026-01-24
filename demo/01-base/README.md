@@ -213,7 +213,6 @@ Check out these related projects.
 > ✅ We build it side by side with your team.<br/>
 > ✅ Your team owns the code and the outcome.<br/>
 > ✅ 100% Open Source Terraform with paid, hands on consultancy.<br/>
-> ✅ Optional YouTube walkthroughs explaining the architecture and code.<br/>
 >
 > <a href="https://spacerocket.dev"><img alt="Request Quote" src="https://img.shields.io/badge/request%20quote-success.svg?style=for-the-badge"/></a>
 >

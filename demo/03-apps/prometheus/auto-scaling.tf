@@ -1,6 +1,6 @@
 # module "rmb_auto_scaling_fargate_predefined_cpu_ram" {
 #   source                     = "./modules/autoscaling-fargate-predefined-cpu-ram"
-#   account_id                 = var.account_id
+#   account_id                 = local.account_id
 #   env                        = var.env
 #   project                    = var.project
 #   region                     = var.region

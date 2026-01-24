@@ -1,12 +1,13 @@
-# ECS Cluster Module Group Demo
+# ECS Cluster Module Demo
 
-**Module Group** to provision a production ready Amazon ECS cluster that serves as the shared compute foundation for application workloads.
+**Module** to provision a production ready Amazon ECS cluster that serves as the shared compute foundation for application workloads.
 
-This Module Group builds on the Base Module Group and establishes a centralized ECS control plane using AWS Fargate. It creates the ECS cluster, capacity providers, execution and task IAM roles, and baseline permissions required to run containerized services securely and consistently. It is designed to be consumed by downstream application modules that deploy ECS services, CI CD pipelines, and ALB routing rules.
+
+This Module builds on the Base Module Group and establishes a centralized ECS control plane using AWS Fargate. It creates the ECS cluster, capacity providers, execution and task IAM roles, and baseline permissions required to run containerized services securely and consistently. It is designed to be consumed by downstream application modules that deploy ECS services, CI CD pipelines, and ALB routing rules.
 
 ## What This Module Provisions
 
-This Module Group provisions the following resources:
+This Module provisions the following resources:
 
 - An Amazon ECS cluster with Container Insights enabled for metrics and logs.
 - Fargate capacity provider configuration with a default strategy.
@@ -144,7 +145,7 @@ This module primarily consumes configuration from the Base Module Group via remo
 > ✅ We build it side by side with your team.<br/>
 > ✅ Your team owns the code and the outcome.<br/>
 > ✅ 100% Open Source Terraform with paid, hands on consultancy.<br/>
-> ✅ Optional YouTube walkthroughs explaining the architecture and code.<br/>
+<br/>
 >
 > <a href="https://spacerocket.dev"><img alt="Request Quote" src="https://img.shields.io/badge/request%20quote-success.svg?style=for-the-badge"/></a>
 >

@@ -1,6 +1,6 @@
 variable "alb_config" {
   type = object({
-    account_id                = string
+    account_id                = optional(string, "")
     env                       = string
     project                   = string
     name_prefix               = string

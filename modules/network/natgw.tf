@@ -1,4 +1,8 @@
 resource "aws_eip" "ngw" {
+  # NOTE: This module only creates customer-managed Elastic IPs for NAT Gateway egress.
+  # You may still see additional public IPs in the AWS console (for example, attached to ALB-owned ENIs).
+  # Those are AWS-managed service addresses, not EIPs created by this module, and should not be treated as
+  # stable allowlist targets or "customer-owned" IPs.
   count  = local.natgw_count
   domain = "vpc"
 

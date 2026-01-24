@@ -21,7 +21,7 @@ data "aws_iam_policy_document" "cloudwatch_exporter_policy" {
       "logs:DescribeLogGroups",
       "logs:GetLogEvents"
     ]
-    resources = ["arn:aws:logs:${var.region}:${var.account_id}:log-group:*"]
+    resources = ["arn:aws:logs:${var.region}:${local.account_id}:log-group:*"]
   }
 }
 
