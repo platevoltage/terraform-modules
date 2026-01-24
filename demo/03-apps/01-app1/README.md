@@ -1,4 +1,7 @@
-# Hello World
+# App1
+
+This stack deploys a production ready ECS Fargate application with CI CD, ALB routing, secrets injection, logging, and optional blue green deployments. It is designed to be consumed after the Base and ECS Cluster module demos.
+
 
 > [!IMPORTANT]
 > ### App name must be registered in the base configuration
@@ -60,6 +63,7 @@
 | data.terraform_remote_state.ecs_cluster | data source | Consumes outputs from the ECS Cluster Module |
 
 ## Outputs
+Output values are resolved from the outputs_map object, where each entry provides a resolved value along with its description, schema version, and the module version it was introduced in via since. Ex: `outputs_map.value.app_name.value`
 
 | Name | Description |
 |------|-------------|

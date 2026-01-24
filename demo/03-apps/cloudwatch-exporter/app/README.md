@@ -19,7 +19,7 @@ curl http://localhost:9106/metrics
 
 ```bash
 export AWS_REGION=us-east-1
-export AWS_ACCOUNT_ID=078618946307
+export AWS_ACCOUNT_ID=123456789012
 export ECR_REPO=space-rocket/prod/cloudwatch-exporter
 export IMAGE_TAG=latest
 export ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}"

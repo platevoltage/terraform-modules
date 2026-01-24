@@ -15,7 +15,7 @@ docker run --rm -p 9090:9090 \
 Push latest from Mac Silicon to ECS AMD Fargate
 ```bash
 export AWS_REGION=us-east-1
-export AWS_ACCOUNT_ID=078618946307
+export AWS_ACCOUNT_ID=123456789012
 export ECR_REPO=space-rocket/prod/prometheus
 export IMAGE_TAG=latest
 export ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}"
