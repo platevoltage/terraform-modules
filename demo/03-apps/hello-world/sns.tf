@@ -1,7 +1,5 @@
 data "aws_caller_identity" "current" {}
 
-data "aws_region" "current" {}
-
 # CMK for SNS topic encryption
 resource "aws_kms_key" "sns_topic" {
   description             = "KMS CMK for ${local.task_name}-codepipeline-notify SNS topic"
@@ -37,7 +35,7 @@ resource "aws_kms_key" "sns_topic" {
             "aws:SourceAccount": "${data.aws_caller_identity.current.account_id}"
           },
           ArnLike: {
-            "kms:EncryptionContext:aws:sns:arn": "arn:aws:sns:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${local.task_name}-codepipeline-notify"
+              "kms:EncryptionContext:aws:sns:arn": "arn:aws:sns:${local.region}:${data.aws_caller_identity.current.account_id}:${local.task_name}-codepipeline-notify"
           }
         }
       }
