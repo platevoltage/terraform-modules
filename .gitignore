@@ -9,7 +9,10 @@ override.tf.json
 *_override.tf.json
 .terraform/
 .terraform.lock.hcl
-backend.hcl
+**/backend.hcl
+**/backend_*.hcl
+
+
 
 # Sensitive files
 *.pem
