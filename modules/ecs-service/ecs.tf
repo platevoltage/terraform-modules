@@ -34,6 +34,7 @@ locals {
 }
 
 
+# ECS task definition for the Hello World application
 resource "aws_ecs_task_definition" "app" {
   family                   = var.ecs_service_config.task_name
   container_definitions    = local.app_config
@@ -89,7 +90,7 @@ resource "aws_ecs_task_definition" "app" {
 #   }
 
 # }
-# ROLLING service
+# ECS service used for rolling deployments
 resource "aws_ecs_service" "ecs_app_service_rolling" {
   for_each               = var.ecs_service_config.deployment_strategy == "rolling" ? { this = 1 } : {}
   name                   = "${var.ecs_service_config.task_name}-fargate-service"
@@ -121,7 +122,7 @@ resource "aws_ecs_service" "ecs_app_service_rolling" {
   }
 }
 
-# CODE_DEPLOY controlled service for blue/green
+# ECS service controlled by CodeDeploy for blue green deployments
 resource "aws_ecs_service" "ecs_app_service_codedeploy" {
   for_each               = var.ecs_service_config.deployment_strategy == "blue_green" ? { this = 1 } : {}
   name                   = "${var.ecs_service_config.task_name}-fargate-service"

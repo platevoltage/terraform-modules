@@ -1,9 +1,9 @@
 #######################
 # CloudWatch Log Group (KMS-encrypted)
 #######################
-# KMS key for CloudWatch Logs
+# KMS key used to encrypt CloudWatch Logs
 resource "aws_kms_key" "cloudwatch_logs" {
-  description             = "KMS key for encrypting CloudWatch Logs for ${var.ecs_service_config.log_group_name}"
+  description             = "KMS key used to encrypt CloudWatch Logs"
   enable_key_rotation     = true
   deletion_window_in_days = 30
 
@@ -41,12 +41,13 @@ resource "aws_kms_key" "cloudwatch_logs" {
 POLICY
 }
 
+# Alias for the CloudWatch Logs KMS key
 resource "aws_kms_alias" "cloudwatch_logs" {
   name          = "alias/${var.ecs_service_config.app_name}-cloudwatch-logs"
   target_key_id = aws_kms_key.cloudwatch_logs.key_id
 }
 
-# Encrypted log group
+# KMS encrypted CloudWatch log group for application logs
 resource "aws_cloudwatch_log_group" "fargate_task_log_group" {
   name              = var.ecs_service_config.log_group_name
   retention_in_days = 365

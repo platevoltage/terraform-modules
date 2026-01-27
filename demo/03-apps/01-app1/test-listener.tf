@@ -1,4 +1,4 @@
-# HTTPS test listener for CodeDeploy test traffic
+# HTTPS test listener used for CodeDeploy blue green test traffic
 resource "aws_lb_listener" "test_8080" {
   load_balancer_arn = local.base_outputs.alb_arn
   port              = 8443

@@ -1,4 +1,4 @@
-# observability/prod/ecs-cluster/data.tf
+# Consumes outputs from the Base Module Group
 data "terraform_remote_state" "base" {
   backend = "s3"
   config = {

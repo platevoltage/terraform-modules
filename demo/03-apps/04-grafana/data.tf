@@ -1,3 +1,4 @@
+# Consumes outputs from the Base Module Group
 data "terraform_remote_state" "base" {
   backend = "s3"
   config = {
@@ -9,6 +10,7 @@ data "terraform_remote_state" "base" {
   }
 }
 
+# Consumes outputs from the ECS Cluster Module
 data "terraform_remote_state" "ecs_cluster" {
   backend = "s3"
   config = {

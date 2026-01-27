@@ -1,10 +1,11 @@
+# CodeDeploy application for ECS deployments
 resource "aws_codedeploy_app" "ecs" {
   for_each         = var.ecs_service_config.deployment_strategy == "blue_green" ? { this = 1 } : {}
   name             = "${var.ecs_service_config.task_name}-cd-app"
   compute_platform = "ECS"
 }
 
-# IAM role for CodeDeploy (trusts codedeploy.amazonaws.com)
+# IAM role assumed by CodeDeploy
 data "aws_iam_policy_document" "codedeploy_assume" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -21,6 +22,7 @@ resource "aws_iam_role" "codedeploy" {
   assume_role_policy = data.aws_iam_policy_document.codedeploy_assume.json
 }
 
+# Attaches AWS managed CodeDeploy ECS policy
 resource "aws_iam_role_policy_attachment" "codedeploy_managed" {
   for_each = aws_iam_role.codedeploy
   role     = aws_iam_role.codedeploy["this"].name
@@ -28,6 +30,7 @@ resource "aws_iam_role_policy_attachment" "codedeploy_managed" {
   policy_arn = "arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS"
 }
 
+# CodeDeploy deployment group managing traffic shifting
 resource "aws_codedeploy_deployment_group" "ecs" {
   count               = var.ecs_service_config.deployment_strategy == "blue_green" ? 1 : 0
   # for_each            = aws_codedeploy_app.ecs

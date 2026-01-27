@@ -1,3 +1,4 @@
+# Loads application secrets from SSM Parameter Store
 data "aws_ssm_parameters_by_path" "all_app_secrets" {
   path            = local.path_prefix
   recursive       = true

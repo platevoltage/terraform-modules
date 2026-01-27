@@ -1,3 +1,4 @@
+# Alarm triggered when ALB target group reports unhealthy tasks
 resource "aws_cloudwatch_metric_alarm" "unhealthy_instance_count" {
   alarm_name          = "${var.target_group_config.tg_name}-unhealthy-hosts"
   comparison_operator = "GreaterThanOrEqualToThreshold"

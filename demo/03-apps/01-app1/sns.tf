@@ -1,8 +1,9 @@
+# Retrieves the AWS account ID at runtime
 data "aws_caller_identity" "current" {}
 
-# CMK for SNS topic encryption
+# Customer managed KMS key used to encrypt the SNS topic
 resource "aws_kms_key" "sns_topic" {
-  description             = "KMS CMK for ${local.task_name}-codepipeline-notify SNS topic"
+  description             = "Customer managed KMS key used to encrypt the SNS topic"
   deletion_window_in_days = 30
   enable_key_rotation     = true
 
@@ -47,19 +48,20 @@ resource "aws_kms_key" "sns_topic" {
   })
 }
 
+# Alias for the SNS KMS key
 resource "aws_kms_alias" "sns_topic" {
   name          = "alias/${local.task_name}-sns"
   target_key_id = aws_kms_key.sns_topic.key_id
 }
 
-# Encrypted SNS topic
+# SNS topic used for CodePipeline and deployment notifications
 resource "aws_sns_topic" "codepipeline_notifications" {
   name               = "${local.task_name}-codepipeline-notify"
   kms_master_key_id  = aws_kms_key.sns_topic.arn
   tags               = local.base_config.common_tags
 }
 
-# Allow CodeStar Notifications to publish into the topic
+# Allows CodeStar Notifications to publish to the application SNS topic
 data "aws_iam_policy_document" "sns_topic_policy" {
   statement {
     effect = "Allow"
@@ -72,6 +74,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
   }
 }
 
+# Allows CodeStar Notifications to publish to the application SNS topic
 resource "aws_sns_topic_policy" "default" {
   arn    = aws_sns_topic.codepipeline_notifications.arn
   policy = data.aws_iam_policy_document.sns_topic_policy.json
