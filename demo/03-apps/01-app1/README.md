@@ -1,4 +1,4 @@
-# App1
+# 01-App1 Module Group
 
 This stack deploys a production ready ECS Fargate application with CI CD, ALB routing, secrets injection, logging, and optional blue green deployments. It is designed to be consumed after the Base and ECS Cluster module demos.
 
