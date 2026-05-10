@@ -1,7 +1,7 @@
-customer_ip_address    = "104.28.49.23"     # replace with real acme1 primary VPN IP
-customer_cidr          = "100.65.0.0/17"
-customer_ip_address_dr = "104.28.49.23"     # replace with real acme1 DR VPN IP
-customer_cidr_dr       = "100.65.128.0/17"
+customer_ip_address    = "104.28.49.23"
+customer_cidr          = "192.168.1.51/16"
+customer_ip_address_dr = "104.28.49.23"
+customer_cidr_dr       = "192.168.1.51/16"
 
 bgp_asn            = 65001
 static_routes_only = false
