@@ -39,12 +39,3 @@ resource "tfe_variable" "base_config_vars" {
   value        = each.value
   category     = "terraform"
 }
-
-resource "tfe_variable" "client_workspace_vars" {
-  for_each = local.client_var_pairs
-
-  workspace_id = tfe_workspace.workspaces[each.value.ws_key].id
-  key          = each.value.var_key
-  value        = each.value.var_val
-  category     = "terraform"
-}

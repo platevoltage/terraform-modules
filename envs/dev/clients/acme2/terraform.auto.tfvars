@@ -1,5 +1,7 @@
-# Customer IPs and CIDRs are managed as TFC workspace variables in hcp-admin.
-# Update client_workspace_vars in hcp-admin/locals.tf when real values are received.
+customer_ip_address    = "203.0.113.11"    # replace with real acme2 primary VPN IP
+customer_cidr          = "100.66.0.0/17"
+customer_ip_address_dr = "203.0.113.12"    # replace with real acme2 DR VPN IP
+customer_cidr_dr       = "100.66.128.0/17"
 
 bgp_asn            = 65002
 static_routes_only = false
