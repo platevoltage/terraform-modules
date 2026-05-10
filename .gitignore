@@ -23,6 +23,9 @@ override.tf.json
 *.auto.tfvars
 *.auto.tfvars.json
 
+# Non-sensitive auto.tfvars committed to source control
+!envs/dev/clients/*/terraform.auto.tfvars
+
 # Local execution and plan files
 terraform.tfplan
 terraform.tfplan.*
