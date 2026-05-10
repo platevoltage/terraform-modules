@@ -13,10 +13,23 @@ locals {
     client_name            = local.client_name
     transit_gateway_id     = local.tgw_outputs.transit_gateway_id
     transit_gateway_rtb_id = local.tgw_outputs.transit_gateway_route_table_id
+
     customer_ip_address    = var.customer_ip_address
-    bgp_asn                = var.bgp_asn
     customer_cidr          = var.customer_cidr
-    static_routes_only     = var.static_routes_only
+    customer_ip_address_dr = var.customer_ip_address_dr
+    customer_cidr_dr       = var.customer_cidr_dr
+
+    bgp_asn            = var.bgp_asn
+    static_routes_only = var.static_routes_only
+
+    tunnel_ike_versions                 = var.tunnel_ike_versions
+    tunnel_phase1_integrity_algorithms  = var.tunnel_phase1_integrity_algorithms
+    tunnel_phase1_encryption_algorithms = var.tunnel_phase1_encryption_algorithms
+    tunnel_phase1_dh_group_numbers      = var.tunnel_phase1_dh_group_numbers
+    tunnel_phase2_integrity_algorithms  = var.tunnel_phase2_integrity_algorithms
+    tunnel_phase2_encryption_algorithms = var.tunnel_phase2_encryption_algorithms
+    tunnel_phase2_dh_group_numbers      = var.tunnel_phase2_dh_group_numbers
+
     common_tags = merge(local.base_config.common_tags, {
       Client = local.client_name
     })
