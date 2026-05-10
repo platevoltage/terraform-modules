@@ -11,6 +11,7 @@ locals {
     amazon_side_asn    = 64512
     vpc_id             = local.vpc_outputs.vpc_id
     private_subnet_ids = local.vpc_outputs.private_subnet_ids
+    flow_logs_enabled  = true
     common_tags        = local.base_config.common_tags
   }
 }

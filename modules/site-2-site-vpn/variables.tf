@@ -18,6 +18,8 @@ variable "site_2_site_vpn_config" {
     bgp_asn            = number
     static_routes_only = optional(bool, false)
 
+    tunnel_startup_action               = optional(string, "start")
+    tunnel_dpd_timeout_action           = optional(string, "restart")
     tunnel_ike_versions                 = optional(list(string), ["ikev2"])
     tunnel_phase1_integrity_algorithms  = optional(list(string), ["SHA2-256", "SHA2-384", "SHA2-512"])
     tunnel_phase1_encryption_algorithms = optional(list(string), ["AES256", "AES256-GCM-16"])

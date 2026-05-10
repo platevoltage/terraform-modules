@@ -9,6 +9,7 @@ variable "transit_gateway_config" {
     amazon_side_asn    = number
     vpc_id             = string
     private_subnet_ids = list(string)
+    flow_logs_enabled  = optional(bool, true)
     common_tags        = map(string)
   })
 }

@@ -20,6 +20,8 @@ resource "aws_vpn_connection" "main" {
   type                = "ipsec.1"
   static_routes_only  = local.c.static_routes_only
 
+  tunnel1_startup_action               = local.c.tunnel_startup_action
+  tunnel1_dpd_timeout_action           = local.c.tunnel_dpd_timeout_action
   tunnel1_ike_versions                 = local.c.tunnel_ike_versions
   tunnel1_phase1_integrity_algorithms  = local.c.tunnel_phase1_integrity_algorithms
   tunnel1_phase1_encryption_algorithms = local.c.tunnel_phase1_encryption_algorithms
@@ -28,6 +30,8 @@ resource "aws_vpn_connection" "main" {
   tunnel1_phase2_encryption_algorithms = local.c.tunnel_phase2_encryption_algorithms
   tunnel1_phase2_dh_group_numbers      = local.c.tunnel_phase2_dh_group_numbers
 
+  tunnel2_startup_action               = local.c.tunnel_startup_action
+  tunnel2_dpd_timeout_action           = local.c.tunnel_dpd_timeout_action
   tunnel2_ike_versions                 = local.c.tunnel_ike_versions
   tunnel2_phase1_integrity_algorithms  = local.c.tunnel_phase1_integrity_algorithms
   tunnel2_phase1_encryption_algorithms = local.c.tunnel_phase1_encryption_algorithms
@@ -66,6 +70,8 @@ resource "aws_vpn_connection" "dr" {
   type                = "ipsec.1"
   static_routes_only  = local.c.static_routes_only
 
+  tunnel1_startup_action               = local.c.tunnel_startup_action
+  tunnel1_dpd_timeout_action           = local.c.tunnel_dpd_timeout_action
   tunnel1_ike_versions                 = local.c.tunnel_ike_versions
   tunnel1_phase1_integrity_algorithms  = local.c.tunnel_phase1_integrity_algorithms
   tunnel1_phase1_encryption_algorithms = local.c.tunnel_phase1_encryption_algorithms
@@ -74,6 +80,8 @@ resource "aws_vpn_connection" "dr" {
   tunnel1_phase2_encryption_algorithms = local.c.tunnel_phase2_encryption_algorithms
   tunnel1_phase2_dh_group_numbers      = local.c.tunnel_phase2_dh_group_numbers
 
+  tunnel2_startup_action               = local.c.tunnel_startup_action
+  tunnel2_dpd_timeout_action           = local.c.tunnel_dpd_timeout_action
   tunnel2_ike_versions                 = local.c.tunnel_ike_versions
   tunnel2_phase1_integrity_algorithms  = local.c.tunnel_phase1_integrity_algorithms
   tunnel2_phase1_encryption_algorithms = local.c.tunnel_phase1_encryption_algorithms
