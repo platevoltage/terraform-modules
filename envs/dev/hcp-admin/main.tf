@@ -14,6 +14,7 @@ resource "tfe_workspace" "workspaces" {
   auto_apply            = false
   file_triggers_enabled = true
   queue_all_runs        = false
+  global_remote_state   = true
 
   vcs_repo {
     identifier     = "space-rocket/terraform-modules"
