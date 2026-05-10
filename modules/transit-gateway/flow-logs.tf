@@ -47,10 +47,11 @@ resource "aws_iam_role_policy" "tgw_flow_logs" {
 
 resource "aws_flow_log" "tgw" {
   count                = var.transit_gateway_config.flow_logs_enabled ? 1 : 0
-  transit_gateway_id   = aws_ec2_transit_gateway.main.id
-  iam_role_arn         = aws_iam_role.tgw_flow_logs[0].arn
-  log_destination      = aws_cloudwatch_log_group.tgw_flow_logs[0].arn
-  log_destination_type = "cloud-watch-logs"
+  transit_gateway_id        = aws_ec2_transit_gateway.main.id
+  iam_role_arn              = aws_iam_role.tgw_flow_logs[0].arn
+  log_destination           = aws_cloudwatch_log_group.tgw_flow_logs[0].arn
+  log_destination_type      = "cloud-watch-logs"
+  max_aggregation_interval  = 60
 
   tags = merge(local.common_tags, {
     Name = "${local.name_prefix}-tgw-flow-log"
