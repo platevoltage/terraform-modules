@@ -14,7 +14,6 @@ resource "tfe_workspace" "workspaces" {
   auto_apply            = false
   file_triggers_enabled = true
   queue_all_runs        = false
-  global_remote_state   = true
 
   vcs_repo {
     identifier     = "space-rocket/terraform-modules"
@@ -48,4 +47,33 @@ resource "tfe_variable" "client_workspace_vars" {
   key          = each.value.var_key
   value        = each.value.var_val
   category     = "terraform"
+}
+
+# ── Remote state access ───────────────────────────────────────────────────────
+
+resource "tfe_workspace_settings" "base_config" {
+  workspace_id = tfe_workspace.workspaces["base_config"].id
+  remote_state_consumer_ids = toset([
+    tfe_workspace.workspaces["vpc"].id,
+    tfe_workspace.workspaces["transit_gateway"].id,
+    tfe_workspace.workspaces["acme1"].id,
+    tfe_workspace.workspaces["acme2"].id,
+    tfe_workspace.workspaces["acme3"].id,
+  ])
+}
+
+resource "tfe_workspace_settings" "vpc" {
+  workspace_id = tfe_workspace.workspaces["vpc"].id
+  remote_state_consumer_ids = toset([
+    tfe_workspace.workspaces["transit_gateway"].id,
+  ])
+}
+
+resource "tfe_workspace_settings" "transit_gateway" {
+  workspace_id = tfe_workspace.workspaces["transit_gateway"].id
+  remote_state_consumer_ids = toset([
+    tfe_workspace.workspaces["acme1"].id,
+    tfe_workspace.workspaces["acme2"].id,
+    tfe_workspace.workspaces["acme3"].id,
+  ])
 }
