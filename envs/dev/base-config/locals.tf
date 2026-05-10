@@ -1,5 +1,5 @@
 locals {
-  name_prefix = "${var.org}-${var.project}-${var.env}"
+  name_prefix = "${var.org}-${var.project}"
 
   base_config = {
     org         = var.org
