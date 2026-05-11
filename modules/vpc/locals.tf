@@ -6,6 +6,6 @@ locals {
 
   private_subnet_cidrs = [
     for i in range(var.vpc_config.az_count) :
-    cidrsubnet(var.vpc_config.vpc_cidr, 8, i + 1)
+    cidrsubnet(var.vpc_config.vpc_cidr, var.vpc_config.subnet_newbits, i + 1)
   ]
 }
