@@ -8,4 +8,9 @@ locals {
     for i in range(var.vpc_config.az_count) :
     cidrsubnet(var.vpc_config.vpc_cidr, var.vpc_config.subnet_newbits, i + 1)
   ]
+
+  public_subnet_cidrs = [
+    for i in range(var.vpc_config.az_count) :
+    cidrsubnet(var.vpc_config.vpc_cidr, var.vpc_config.subnet_newbits, i + 1 + var.vpc_config.az_count)
+  ]
 }

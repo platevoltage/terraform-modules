@@ -8,8 +8,9 @@ variable "vpc_config" {
     name_prefix       = string
     vpc_cidr          = string
     az_count          = number
-    subnet_newbits    = optional(number, 8)
-    flow_logs_enabled = optional(bool, true)
+    subnet_newbits        = optional(number, 8)
+    create_public_subnets = optional(bool, false)
+    flow_logs_enabled     = optional(bool, true)
     common_tags       = map(string)
   })
 }

@@ -11,6 +11,10 @@ locals {
       name     = "Vpc101200-VPC"
       work_dir = "envs/vpc101200/vpc"
     }
+    igw = {
+      name     = "Vpc101200-IGW"
+      work_dir = "envs/vpc101200/igw"
+    }
     eip = {
       name     = "Vpc101200-EIP"
       work_dir = "envs/vpc101200/eip"
