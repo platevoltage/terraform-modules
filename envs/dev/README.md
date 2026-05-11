@@ -1,0 +1,1 @@
+sudo mkdir -p /opt/homebrew/etc/swanctl/conf.d

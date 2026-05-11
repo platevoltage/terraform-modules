@@ -1,10 +1,9 @@
-customer_ip_address    = "104.28.49.23"
-customer_cidr          = "192.168.1.51/16"
-customer_ip_address_dr = "104.28.49.23"
-customer_cidr_dr       = "192.168.1.51/16"
-
-bgp_asn            = 65001
-static_routes_only = false
+customer_ip_address    = "146.75.154.54"
+customer_cidr          = "10.1.0.0/16"
+customer_ip_address_dr = "146.75.154.54"
+customer_cidr_dr       = "10.1.0.0/16"
+bgp_asn                = 65001
+static_routes_only     = false
 
 tunnel_ike_versions                 = ["ikev2"]
 tunnel_phase1_integrity_algorithms  = ["SHA2-256", "SHA2-384", "SHA2-512"]
