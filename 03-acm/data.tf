@@ -1,5 +1,5 @@
 data "aws_acm_certificate" "main" {
-  domain      = var.base_domain
+  domain      = "*.dashtwo.com"
   statuses    = ["ISSUED"]
   most_recent = true
 }
