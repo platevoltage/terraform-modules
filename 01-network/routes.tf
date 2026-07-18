@@ -52,3 +52,44 @@ resource "aws_route" "route_public" {
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_internet_gateway.igw.id
 }
+
+
+# SSM VPC ENDPOINTS
+
+data "aws_region" "current" {}
+
+resource "aws_vpc_endpoint" "ssm" {
+  vpc_id = aws_vpc.main.id
+
+  service_name = "com.amazonaws.${data.aws_region.current.name}.ssm"
+
+  vpc_endpoint_type = "Interface"
+
+  private_dns_enabled = true
+
+  subnet_ids = aws_subnet.public[*].id
+
+  security_group_ids = [
+    aws_security_group.ssm_endpoint.id
+  ]
+
+  tags = local.common_tags
+}
+
+resource "aws_vpc_endpoint" "ssmmessages" {
+  vpc_id = aws_vpc.main.id
+
+  service_name = "com.amazonaws.${data.aws_region.current.name}.ssmmessages"
+
+  vpc_endpoint_type = "Interface"
+
+  private_dns_enabled = true
+
+  subnet_ids = aws_subnet.public[*].id
+
+  security_group_ids = [
+    aws_security_group.ssm_endpoint.id
+  ]
+
+  tags = local.common_tags
+}
