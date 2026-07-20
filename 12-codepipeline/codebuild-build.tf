@@ -74,7 +74,7 @@ resource "aws_codebuild_project" "build" {
           commands:
             - echo "🚀 Starting build phase..."
             - echo Building the Docker image...
-            - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+            - docker build --build-arg NEXT_PUBLIC_DT_API=$NEXT_PUBLIC_DT_API -t $IMAGE_REPO_NAME:$IMAGE_TAG .
             - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
         post_build:
           commands:
