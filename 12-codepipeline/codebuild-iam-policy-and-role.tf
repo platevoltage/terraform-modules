@@ -117,6 +117,17 @@ data "aws_iam_policy_document" "codebuild_policy_document" {
     # ]
     resources = ["*"]
   }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "ssm:GetParameter",
+      "ssm:GetParameters"
+    ]
+    resources = [
+      "arn:aws:ssm:${local.region}:${local.account_id}:parameter${local.ssm_parameter_path}/*"
+    ]
+  }
 }
 
 resource "aws_iam_role_policy" "codebuild_role_policy" {
