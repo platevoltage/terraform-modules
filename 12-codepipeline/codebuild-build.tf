@@ -68,7 +68,7 @@ resource "aws_codebuild_project" "build" {
             - echo 👉 IMAGE_TAG $IMAGE_TAG
             - echo Logging in to Amazon ECR...
             - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-            - export NEXT_PUBLIC_DT_API=$(aws ssm get-parameter --name ${var.ssm_parameter_path}/NEXT_PUBLIC_DT_API --query Parameter.Value --output text)
+            - export NEXT_PUBLIC_DT_API=$(aws ssm get-parameter --name ${var.ssm_parameter_path}/NEXT_PUBLIC_DT_API --with-decryption --query Parameter.Value --output text)
             - echo "DEBUG NEXT_PUBLIC_DT_API is $NEXT_PUBLIC_DT_API"
         build:
           commands:
