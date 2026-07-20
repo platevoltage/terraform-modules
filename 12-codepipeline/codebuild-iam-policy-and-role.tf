@@ -128,6 +128,16 @@ data "aws_iam_policy_document" "codebuild_policy_document" {
       "${local.ssm_secret_path_prefix}/*"
     ]
   }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "kms:Decrypt"
+    ]
+    resources = [
+      "arn:aws:kms:${local.region}:${local.account_id}:alias/aws/ssm"
+    ]
+  }
 }
 
 resource "aws_iam_role_policy" "codebuild_role_policy" {
