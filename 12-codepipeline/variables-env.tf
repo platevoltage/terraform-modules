@@ -151,3 +151,7 @@ variable "fargate_memory" {
   # default     = 512
 }
 
+variable "ssm_parameter_path" {
+  description = "Plain SSM path prefix (not ARN) for this app's parameters"
+  type        = string
+}
