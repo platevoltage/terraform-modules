@@ -125,7 +125,7 @@ data "aws_iam_policy_document" "codebuild_policy_document" {
       "ssm:GetParameters"
     ]
     resources = [
-      "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${local.ssm_secret_path_prefix}/*"
+      "${local.ssm_secret_path_prefix}/*"
     ]
   }
 }
