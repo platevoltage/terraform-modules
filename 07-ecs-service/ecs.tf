@@ -86,4 +86,8 @@ resource "aws_ecs_service" "ecs_app_service" {
   }
 
   depends_on = [var.listener_443_arn]
+
+  lifecycle {
+    ignore_changes = [task_definition]
+  }
 }
