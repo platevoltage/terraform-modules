@@ -74,7 +74,7 @@ resource "aws_docdb_cluster" "restore" {
   snapshot_identifier   = var.snapshot_identifier
   db_subnet_group_name  = aws_docdb_subnet_group.this.name
   vpc_security_group_ids = [aws_security_group.docdb.id]
-
+  storage_encrypted       = true
   tags = merge(var.tags, { Name = local.cluster_identifier })
 }
 
